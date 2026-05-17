@@ -1,22 +1,24 @@
-export const API_BASE = 'http://192.168.18.143:8000';
+export const API_BASE = 'http://127.0.0.1:8000';
 
 export const C = {
   bg:         '#080B14',
-  surface:    '#0F1220',
-  surfaceAlt: '#161926',
-  border:     '#1E2336',
-  blue:       '#4F8EF7',
-  blueGlow:   '#4F8EF722',
-  green:      '#22C55E',
-  greenGlow:  '#22C55E22',
+  surface:    '#0F1320',
+  surfaceAlt: '#161B2E',
+  border:     '#1E3A8A',
+  blue:       '#4F6EF7',
+  blueGlow:   '#4F6EF722',
+  purple:     '#A78BFA',
+  purpleGlow: '#A78BFA22',
+  green:      '#10B981',
+  greenGlow:  '#10B98122',
   amber:      '#F59E0B',
   amberGlow:  '#F59E0B22',
   red:        '#EF4444',
   redGlow:    '#EF444422',
-  purple:     '#A855F7',
+  accent:     '#00D4AA',
   text:       '#F1F5F9',
   textSub:    '#94A3B8',
-  textMuted:  '#475569',
+  textMuted:  '#64748B',
 };
 
 export const REASONINGS = [

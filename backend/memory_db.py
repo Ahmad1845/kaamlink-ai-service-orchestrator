@@ -128,6 +128,16 @@ providers_memory = [
         "location": "F-11",
         "distance_km": 2.0
     },
+    {
+        "id": "prov_clean_3",
+        "name": "Eco Shine",
+        "services": ["home cleaning", "window washing", "maid"],
+        "rating": 4.6,
+        "cancellation_rate": 0.05,
+        "base_price": 1300,
+        "location": "G-9",
+        "distance_km": 3.1
+    },
     # ── Carpentry ──────────────────────────────────────────────────────────────
     {
         "id": "prov_carp_1",
@@ -149,6 +159,16 @@ providers_memory = [
         "location": "G-10",
         "distance_km": 2.6
     },
+    {
+        "id": "prov_carp_3",
+        "name": "Iqbal Woodworks",
+        "services": ["carpentry", "cabinet repair", "door lock installation"],
+        "rating": 4.6,
+        "cancellation_rate": 0.04,
+        "base_price": 1100,
+        "location": "I-8",
+        "distance_km": 3.4
+    },
     # ── Painting ──────────────────────────────────────────────────────────────
     {
         "id": "prov_paint_1",
@@ -159,6 +179,26 @@ providers_memory = [
         "base_price": 3000,
         "location": "G-13",
         "distance_km": 1.0
+    },
+    {
+        "id": "prov_paint_2",
+        "name": "Bright Walls",
+        "services": ["painting", "interior paint", "texture painting"],
+        "rating": 4.8,
+        "cancellation_rate": 0.02,
+        "base_price": 3200,
+        "location": "F-8",
+        "distance_km": 2.5
+    },
+    {
+        "id": "prov_paint_3",
+        "name": "Classic Painters",
+        "services": ["painting", "exterior paint", "polish"],
+        "rating": 4.4,
+        "cancellation_rate": 0.08,
+        "base_price": 2800,
+        "location": "I-10",
+        "distance_km": 4.1
     },
     # ── Pest Control ──────────────────────────────────────────────────────────
     {
@@ -171,6 +211,26 @@ providers_memory = [
         "location": "G-13",
         "distance_km": 1.5
     },
+    {
+        "id": "prov_pest_2",
+        "name": "Terminator Pest Services",
+        "services": ["pest control", "fumigation", "bed bugs"],
+        "rating": 4.5,
+        "cancellation_rate": 0.07,
+        "base_price": 3200,
+        "location": "G-11",
+        "distance_km": 2.8
+    },
+    {
+        "id": "prov_pest_3",
+        "name": "SafeHome Fumigation",
+        "services": ["pest control", "dengue spray", "termite"],
+        "rating": 4.7,
+        "cancellation_rate": 0.04,
+        "base_price": 3600,
+        "location": "E-11",
+        "distance_km": 3.9
+    },
     # ── Car Wash ──────────────────────────────────────────────────────────────
     {
         "id": "prov_car_1",
@@ -182,6 +242,26 @@ providers_memory = [
         "location": "G-13",
         "distance_km": 0.9
     },
+    {
+        "id": "prov_car_2",
+        "name": "Sparkle Auto Wash",
+        "services": ["car wash", "interior cleaning", "waxing"],
+        "rating": 4.8,
+        "cancellation_rate": 0.02,
+        "base_price": 600,
+        "location": "F-10",
+        "distance_km": 2.2
+    },
+    {
+        "id": "prov_car_3",
+        "name": "Rapid Detailers",
+        "services": ["car wash", "exterior wash", "auto wash"],
+        "rating": 4.4,
+        "cancellation_rate": 0.09,
+        "base_price": 450,
+        "location": "G-9",
+        "distance_km": 3.5
+    },
     # ── Towing ────────────────────────────────────────────────────────────────
     {
         "id": "prov_tow_1",
@@ -192,5 +272,25 @@ providers_memory = [
         "base_price": 1500,
         "location": "G-13",
         "distance_km": 2.0
+    },
+    {
+        "id": "prov_tow_2",
+        "name": "Swift Tow Trucks",
+        "services": ["towing", "flatbed towing", "breakdown"],
+        "rating": 4.6,
+        "cancellation_rate": 0.06,
+        "base_price": 1600,
+        "location": "I-8",
+        "distance_km": 3.1
+    },
+    {
+        "id": "prov_tow_3",
+        "name": "24/7 Road Rescue",
+        "services": ["towing", "jump start", "vehicle recovery"],
+        "rating": 4.5,
+        "cancellation_rate": 0.08,
+        "base_price": 1400,
+        "location": "H-13",
+        "distance_km": 4.5
     },
 ]

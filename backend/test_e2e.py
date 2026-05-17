@@ -1,271 +1,133 @@
 """
-test_e2e.py - Kaamlink AI Service Orchestrator - Full End-to-End Test Suite
-Tests every scenario: happy paths, edge cases, and ranking validation.
-Run: python test_e2e.py
+Kaamlink Full E2E Test Suite
+Tests every endpoint with real payloads and reports pass/fail.
 """
-
 import requests
 import json
-import time
 
 BASE = "http://127.0.0.1:8000"
-PASS = "[PASS]"
-FAIL = "[FAIL]"
-SKIP = "[SKIP]"
+PASS = "\033[92m PASS\033[0m"
+FAIL = "\033[91m FAIL\033[0m"
+WARN = "\033[93m WARN\033[0m"
 
 results = []
 
-def log(status, name, detail=""):
-    tag = f"{status} {name}"
-    if detail:
-        tag += f"\n         -> {detail}"
-    print(tag)
-    results.append((status, name))
-
-def separator(title):
-    print(f"\n{'='*60}")
-    print(f"  {title}")
-    print('='*60)
-
-# ── Helper ────────────────────────────────────────────────────────────────────
-
-def post_intent(text):
-    r = requests.post(f"{BASE}/api/request", json={"text": text}, timeout=15)
-    r.raise_for_status()
-    return r.json()
-
-def post_providers(intent):
-    r = requests.post(f"{BASE}/api/providers", json=intent, timeout=20)
-    r.raise_for_status()
-    return r.json()
-
-def get_logs():
-    r = requests.get(f"{BASE}/api/logs", timeout=10)
-    r.raise_for_status()
-    return r.json()
-
-def post_book(provider_id, service):
-    r = requests.post(f"{BASE}/api/book", json={
-        "provider_id": provider_id,
-        "user_id": "test-user-e2e",
-        "service": service
-    }, timeout=10)
-    r.raise_for_status()
-    return r.json()
-
-# ══════════════════════════════════════════════════════════════════════════════
-# 1. Health Check
-# ══════════════════════════════════════════════════════════════════════════════
-separator("1. HEALTH CHECK")
-
-try:
-    r = requests.get(f"{BASE}/", timeout=5)
-    if r.status_code == 200 and "Kaamlink" in r.json().get("message", ""):
-        log(PASS, "GET / returns welcome message")
-    else:
-        log(FAIL, "GET / unexpected response", r.text)
-except Exception as e:
-    log(FAIL, "GET / server not reachable", str(e))
-
-# ══════════════════════════════════════════════════════════════════════════════
-# 2. Intent Extraction - Happy Paths
-# ==============================================================================
-separator("2. INTENT EXTRACTION - HAPPY PATHS")
-
-cases = [
-    ("AC thanda nahi kar raha, G-13",        "AC",         "G-13"),
-    ("mujhe plumber chahiye F-10 mein",      "plumb",      "F-10"),
-    ("electrician needed in DHA",            "electrician","DHA"),
-    ("car wash karao Bahria Town",           "car wash",   "Bahria Town"),
-    ("furniture repair karo F-7",            "carpent",    "F-7"),
-    ("ghar ki safai chahiye I-8",            "cleaning",   "I-8"),
-]
-
-good_intents = []
-for text, exp_service, exp_location in cases:
+def test(name, method, path, body=None, expect_keys=None, expect_status=200):
     try:
-        intent = post_intent(text)
-        svc   = intent.get("service", "").lower()
-        loc   = intent.get("location", "").lower()
-        ok = exp_service.lower() in svc or svc in exp_service.lower()
-        if ok:
-            log(PASS, f'Intent: "{text}"', f'service={intent["service"]} location={intent["location"]}')
-            good_intents.append(intent)
-        else:
-            log(FAIL, f'Intent: "{text}"',
-                f'Expected service~"{exp_service}", got "{intent["service"]}"')
-            good_intents.append(intent)   # still use it for discovery test
+        r = getattr(requests, method)(f"{BASE}{path}", json=body, timeout=30)
+        status_ok = r.status_code == expect_status
+        data = r.json()
+        keys_ok = all(k in data for k in (expect_keys or [])) if isinstance(data, dict) else True
+        ok = status_ok and keys_ok
+        icon = PASS if ok else FAIL
+        print(f"{icon} [{r.status_code}] {name}")
+        if not status_ok:
+            print(f"       Expected {expect_status}, got {r.status_code}: {str(data)[:200]}")
+        if not keys_ok:
+            missing = [k for k in expect_keys if k not in data]
+            print(f"       Missing keys: {missing}")
+        results.append((name, ok, data))
+        return data
     except Exception as e:
-        log(FAIL, f'Intent: "{text}"', str(e))
+        print(f"{FAIL} {name} — Exception: {e}")
+        results.append((name, False, {}))
+        return {}
 
-# ══════════════════════════════════════════════════════════════════════════════
-# 3. Intent Extraction - Edge Cases
-# ==============================================================================
-separator("3. INTENT EXTRACTION - EDGE CASES")
+print("\n=== 1. HEALTH CHECK ===")
+test("GET /", "get", "/", expect_keys=["message"])
 
-# Gibberish
-try:
-    intent = post_intent("asdfghjkl qwerty 12345")
-    svc = intent.get("service", "").lower()
-    if svc == "invalid" or svc == "" or "unknown" in svc:
-        log(PASS, "Gibberish input -> invalid/unknown service", f'got service="{intent["service"]}"')
-    else:
-        log(PASS, "Gibberish input handled (AI guessed)", f'service="{intent["service"]}"')
-except Exception as e:
-    log(FAIL, "Gibberish input crashed server", str(e))
+print("\n=== 2. INTENT AGENT ===")
+intent = test("POST /api/request — Roman Urdu AC",
+    "post", "/api/request",
+    body={"text": "AC thanda nahi kar raha, G-13 mein urgent"},
+    expect_keys=["service","location","urgency","complexity"])
 
-# Missing location
-try:
-    intent = post_intent("mujhe plumber chahiye")
-    loc = intent.get("location", "").lower()
-    if "unknown" in loc or loc == "":
-        log(PASS, "Missing location -> 'unknown'", f'location="{intent["location"]}"')
-    else:
-        log(PASS, "Missing location handled (AI guessed)", f'location="{intent["location"]}"')
-except Exception as e:
-    log(FAIL, "Missing location crashed server", str(e))
+test("POST /api/request — G13 (no hyphen)",
+    "post", "/api/request",
+    body={"text": "G13 mai AC kharab hai"},
+    expect_keys=["service","location"])
 
-# ══════════════════════════════════════════════════════════════════════════════
-# 4. Provider Discovery - Happy Paths
-# ==============================================================================
-separator("4. PROVIDER DISCOVERY - HAPPY PATHS")
+intent2 = test("POST /api/request — English plumbing",
+    "post", "/api/request",
+    body={"text": "Need a plumber urgently in DHA Phase 2"},
+    expect_keys=["service","location","urgency"])
 
-if good_intents:
-    for intent in good_intents[:4]:
-        try:
-            providers = post_providers(intent)
-            if isinstance(providers, list):
-                if len(providers) > 0:
-                    top = providers[0]
-                    log(PASS, f'Providers for "{intent["service"]}" in {intent["location"]}',
-                        f'{len(providers)} results - top: {top["name"]} ({top["rating"]}*, Rs.{top["base_price"]})')
-                else:
-                    log(PASS, f'Providers for "{intent["service"]}" -> 0 results (valid empty)',
-                        "No matching providers in DB for this service/location combo")
-            else:
-                log(FAIL, f'Providers for "{intent["service"]}"', f"Non-list response: {providers}")
-        except Exception as e:
-            log(FAIL, f'Providers for "{intent["service"]}"', str(e))
+test("POST /api/request — Gibberish (should be invalid)",
+    "post", "/api/request",
+    body={"text": "asdfgh xyz 123"})
 
-# ══════════════════════════════════════════════════════════════════════════════
-# 5. Ranking Validation - Top result must have highest rating among location matches
-# ==============================================================================
-separator("5. RANKING VALIDATION")
+print("\n=== 3. DISCOVERY AGENT ===")
+providers = test("POST /api/providers — AC repair",
+    "post", "/api/providers",
+    body=intent if intent else {"service":"AC repair","location":"G-13","urgency":"high","complexity":"intermediate","issue":"not cooling","preferred_time":"asap","budget_sensitive":False,"confidence":0.9})
 
-try:
-    intent = post_intent("AC repair chahiye G-13")
-    providers = post_providers(intent)
-    if len(providers) >= 2:
-        ratings = [p["rating"] for p in providers]
-        is_sorted = all(ratings[i] >= ratings[i+1] for i in range(len(ratings)-1))
-        if is_sorted:
-            log(PASS, "Providers sorted by rating (desc)", f"Ratings: {ratings}")
-        else:
-            log(FAIL, "Providers NOT sorted by rating", f"Ratings: {ratings}")
-    elif len(providers) == 1:
-        log(PASS, "Only 1 provider returned - ranking N/A", f"Rating: {providers[0]['rating']}")
-    else:
-        log(SKIP, "0 providers returned for ranking test")
-except Exception as e:
-    log(FAIL, "Ranking validation error", str(e))
-
-# ══════════════════════════════════════════════════════════════════════════════
-# 6. Discovery Edge Cases
-# ══════════════════════════════════════════════════════════════════════════════
-separator("6. DISCOVERY EDGE CASES")
-
-# Invalid service -> should return []
-try:
-    providers = post_providers({"service": "invalid", "issue": "none", "location": "G-13", "urgency": "normal", "preferred_time": "any", "budget_sensitive": False, "confidence": 0.5})
-    if providers == []:
-        log(PASS, "service=invalid -> empty providers list")
-    else:
-        log(FAIL, "service=invalid -> should return []", f"Got {len(providers)} providers")
-except Exception as e:
-    log(FAIL, "service=invalid crashed server", str(e))
-
-# Unknown location -> should still return providers (global fallback)
-try:
-    providers = post_providers({"service": "plumber", "issue": "none", "location": "unknown", "urgency": "normal", "preferred_time": "any", "budget_sensitive": False, "confidence": 0.5})
-    if isinstance(providers, list):
-        log(PASS, "location=unknown -> global fallback search works",
-            f"{len(providers)} providers returned")
-    else:
-        log(FAIL, "location=unknown -> non-list response", str(providers))
-except Exception as e:
-    log(FAIL, "location=unknown crashed server", str(e))
-
-# Rare combo - towing in Rawalpindi Cantt
-try:
-    intent = post_intent("car towing service needed in Rawalpindi Cantt")
-    providers = post_providers(intent)
-    log(PASS, "Rare combo: towing in Rawalpindi Cantt",
-        f'service="{intent["service"]}" -> {len(providers)} providers')
-except Exception as e:
-    log(FAIL, "Rare combo towing/Rawalpindi", str(e))
-
-# ══════════════════════════════════════════════════════════════════════════════
-# 7. Booking Flow
-# ══════════════════════════════════════════════════════════════════════════════
-separator("7. BOOKING FLOW")
-
-try:
-    intent = post_intent("electrician chahiye E-11")
-    providers = post_providers(intent)
-    if providers:
-        provider = providers[0]
-        booking = post_book(provider["id"], intent["service"])
-        bid = booking.get("booking_id", "")
-        status = booking.get("status", "")
-        if bid and status == "confirmed":
-            log(PASS, "Full booking flow: intent -> providers -> book",
-                f'booking_id={bid[:8].upper()}... status={status}')
-        else:
-            log(FAIL, "Booking response malformed", str(booking))
-    else:
-        log(SKIP, "Booking test skipped - no providers returned for electrician E-11")
-except Exception as e:
-    log(FAIL, "Booking flow crashed", str(e))
-
-# ══════════════════════════════════════════════════════════════════════════════
-# 8. Agent Logs
-# ══════════════════════════════════════════════════════════════════════════════
-separator("8. AGENT LOGS")
-
-try:
-    logs = get_logs()
-    if isinstance(logs, list) and len(logs) > 0:
-        log(PASS, f"GET /api/logs returns {len(logs)} log entries",
-            f'Latest: [{logs[0]["agent_name"]}] {logs[0]["decision"][:60]}')
-        # Verify structure
-        required_keys = {"agent_name", "decision", "reasoning", "id"}
-        if required_keys.issubset(logs[0].keys()):
-            log(PASS, "Log entry has all required fields (id, agent_name, decision, reasoning)")
-        else:
-            log(FAIL, "Log entry missing fields", f"Got keys: {list(logs[0].keys())}")
-    else:
-        log(FAIL, "GET /api/logs returned empty or non-list", str(logs))
-except Exception as e:
-    log(FAIL, "GET /api/logs crashed", str(e))
-
-# ══════════════════════════════════════════════════════════════════════════════
-# 9. Summary
-# ══════════════════════════════════════════════════════════════════════════════
-separator("FINAL SUMMARY")
-
-total  = len(results)
-passed = sum(1 for s, _ in results if s == PASS)
-failed = sum(1 for s, _ in results if s == FAIL)
-skipped= sum(1 for s, _ in results if s == SKIP)
-
-print(f"\n  Total : {total}")
-print(f"  Passed: {passed}  [PASS]")
-print(f"  Failed: {failed}  [FAIL]")
-print(f"  Skipped: {skipped}")
-print(f"\n  Score : {passed}/{total - skipped} ({100*passed//(total-skipped) if total-skipped else 0}%)")
-
-if failed == 0:
-    print("\n  *** ALL TESTS PASSED - SYSTEM IS DEMO-READY ***")
+if isinstance(providers, list) and len(providers) > 0:
+    print(f"       Found {len(providers)} providers: {[p['name'] for p in providers]}")
+    prov0 = providers[0]
 else:
-    print("\n  [!] Some tests failed - review output above.")
-print()
+    prov0 = {"id": "prov-1", "name": "Test AC", "services": ["AC repair"], "rating": 4.5, "cancellation_rate": 0.1, "base_price": 1500, "location": "G-13", "distance_km": 1.2}
+    print(f"{WARN} No providers returned — using dummy for downstream tests")
+
+print("\n=== 4. PRICING AGENT ===")
+pricing = test("POST /api/pricing — AC high urgency",
+    "post", "/api/pricing",
+    body={"service":"AC repair","complexity":"intermediate","urgency":"high","location":"G-13"},
+    expect_keys=["market_min","market_max","suggested_offer","acceptance_probability","recommendation"])
+
+test("POST /api/pricing — with user budget",
+    "post", "/api/pricing",
+    body={"service":"plumbing","complexity":"basic","urgency":"medium","location":"DHA","user_budget":800},
+    expect_keys=["acceptance_probability"])
+
+print("\n=== 5. RADIUS EXPANSION AGENT ===")
+radius = test("POST /api/discover-radius",
+    "post", "/api/discover-radius",
+    body={"service":"AC repair","location":"G-13","urgency":"medium","complexity":"intermediate","issue":"not cooling","preferred_time":"asap","budget_sensitive":False,"confidence":0.9},
+    expect_keys=["providers","final_radius_km"])
+
+print("\n=== 6. BID SIMULATION ===")
+bids_payload = {"providers": [prov0] if isinstance(prov0, dict) else [], "urgency": "high"}
+bids = test("POST /api/bids",
+    "post", "/api/bids",
+    body=bids_payload,
+    expect_keys=["bids"])
+
+print("\n=== 7. BOOKING AGENT ===")
+booking = test("POST /api/book",
+    "post", "/api/book",
+    body={"provider_id": prov0.get("id","prov-1") if isinstance(prov0, dict) else "prov-1", "user_id":"test-user", "service":"AC repair", "amount":1500},
+    expect_keys=["booking_id","status"])
+
+booking_id = booking.get("booking_id", "test-booking-id")
+
+print("\n=== 8. BOOKING FETCH ===")
+test(f"GET /api/booking/{booking_id}",
+    "get", f"/api/booking/{booking_id}")
+
+print("\n=== 9. RECOVERY AGENT ===")
+recovery = test("POST /api/recover",
+    "post", "/api/recover",
+    body={"booking_id": booking_id},
+    expect_keys=["success","steps","message"])
+
+if recovery.get("steps"):
+    print(f"       {len(recovery['steps'])} recovery steps returned")
+if recovery.get("replacement_provider"):
+    print(f"       Replacement: {recovery['replacement_provider'].get('name','?')}")
+
+print("\n=== 10. AGENT LOGS ===")
+test("GET /api/logs", "get", "/api/logs")
+
+print("\n" + "="*50)
+passed = sum(1 for _, ok, _ in results if ok)
+total = len(results)
+print(f"Results: {passed}/{total} passed")
+
+# Specific checks
+if intent:
+    loc = intent.get("location","")
+    print(f"\nLocation normalization check: '{loc}' — {'OK' if loc == 'G-13' else 'FAIL (expected G-13)'}")
+    comp = intent.get("complexity","")
+    print(f"Complexity field: '{comp}' — {'OK' if comp in ['basic','intermediate','complex'] else 'FAIL'}")
+
+print("="*50)

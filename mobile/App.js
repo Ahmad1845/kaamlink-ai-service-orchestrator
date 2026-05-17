@@ -7,10 +7,10 @@ import {
 
 const API = 'http://192.168.18.143:8000';
 const COLORS = {
-  bg: '#0A0A14', card: '#12121F', border: '#1E1E35',
-  blue: '#4F8EF7', purple: '#A855F7', green: '#22C55E',
+  bg: '#0A0A14', card: '#12121F', border: '#1E2A4A',
+  blue: '#4F8EF7', purple: '#A78BFA', green: '#22C55E',
   amber: '#F59E0B', red: '#EF4444', text: '#E2E8F0',
-  muted: '#6B7280', white: '#FFFFFF',
+  muted: '#94A3B8', dimmed: '#64748B', white: '#FFFFFF',
 };
 
 // ─── Reusable Components ──────────────────────────────────────────────────────
@@ -448,13 +448,13 @@ const s = StyleSheet.create({
   btnText: { color: COLORS.white, fontWeight: '700', fontSize: 16 },
   btnOutline: { borderWidth: 1, borderColor: COLORS.blue, padding: 16, borderRadius: 14, alignItems: 'center', marginBottom: 10 },
   btnOutlineText: { color: COLORS.blue, fontWeight: '700', fontSize: 16 },
-  muted: { color: COLORS.muted, fontSize: 13 },
+  muted: { color: COLORS.muted, fontSize: 13, lineHeight: 19 },
   topBar: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
   back: { color: COLORS.blue, fontSize: 15, marginRight: 12 },
   screenTitle: { color: COLORS.text, fontWeight: '700', fontSize: 18 },
   serviceTag: { color: COLORS.purple, fontWeight: '600', marginBottom: 6 },
   priceBox: { backgroundColor: '#1A1A2E', borderRadius: 12, padding: 14, marginBottom: 12 },
-  priceLabel: { color: COLORS.muted, fontSize: 12 },
+  priceLabel: { color: COLORS.muted, fontSize: 12, fontWeight: '600', letterSpacing: 0.3 },
   priceRange: { color: COLORS.text, fontSize: 22, fontWeight: '800', marginTop: 4 },
   suggestedBox: { backgroundColor: COLORS.blue + '22', borderRadius: 12, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: COLORS.blue + '44' },
   aiLabel: { color: COLORS.blue, fontSize: 12, fontWeight: '600' },
@@ -481,7 +481,7 @@ const s = StyleSheet.create({
   successTitle: { color: COLORS.text, fontSize: 24, fontWeight: '900' },
   timelineRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 14 },
   timelineDot: { width: 14, height: 14, borderRadius: 7, marginTop: 2 },
-  timelineLabel: { color: COLORS.muted, fontWeight: '600', fontSize: 14 },
+  timelineLabel: { color: COLORS.dimmed, fontWeight: '600', fontSize: 14 },
   recoveryBanner: { backgroundColor: COLORS.amber + '22', borderRadius: 16, padding: 20, marginBottom: 14, alignItems: 'center', borderWidth: 1, borderColor: COLORS.amber + '55' },
   recoveryIcon: { fontSize: 36, marginBottom: 8 },
   recoveryTitle: { color: COLORS.amber, fontSize: 20, fontWeight: '900', marginBottom: 4 },

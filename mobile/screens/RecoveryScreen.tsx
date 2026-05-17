@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, SafeAreaView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 import { C, API_BASE } from '../constants/kaamlink';
 import { Avatar } from '../components/KaamilinkUI';
 
@@ -23,8 +25,9 @@ export default function RecoveryScreen({ data, onRestart }: { data: any; onResta
   }, []);
 
   return (
-    <SafeAreaView style={s.root}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+    <LinearGradient colors={['#0F1220', '#080B14']} style={s.root}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
 
         <View style={s.warningBanner}>
           <Ionicons name="warning" size={32} color={C.amber} style={{ marginBottom: 8 }} />
@@ -72,37 +75,38 @@ export default function RecoveryScreen({ data, onRestart }: { data: any; onResta
         )}
 
         {!loading && (
-          <TouchableOpacity style={s.restartBtn} onPress={onRestart}>
+          <TouchableOpacity style={s.restartBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onRestart(); }}>
             <Text style={s.restartTxt}>Start New Request →</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.bg },
+  root: { flex: 1 },
   warningBanner: { backgroundColor: C.amber + '15', borderRadius: 20, padding: 24, marginBottom: 14, alignItems: 'center', borderWidth: 1, borderColor: C.amber + '44' },
-  warnTitle: { fontSize: 22, fontWeight: '900', color: C.amber, marginBottom: 6 },
-  warnSub: { fontSize: 13, color: C.textSub, textAlign: 'center', lineHeight: 20 },
-  traceCard: { backgroundColor: C.surface, borderRadius: 18, borderWidth: 1, borderColor: C.blue + '44', padding: 16, marginBottom: 14 },
+  warnTitle: { fontSize: 22, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.amber, marginBottom: 6 },
+  warnSub: { fontSize: 13, color: C.textSub, textAlign: 'center', lineHeight: 20, fontFamily: 'PlusJakartaSans_400Regular' },
+  traceCard: { backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 18, borderWidth: 1, borderColor: C.blue + '44', padding: 16, marginBottom: 14 },
   traceHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-  traceTitle: { color: C.blue, fontWeight: '700', fontSize: 13 },
+  traceTitle: { color: C.blue, fontFamily: 'JetBrainsMono_400Regular', fontSize: 13 },
   stepRow: { flexDirection: 'row', marginBottom: 14, alignItems: 'flex-start' },
   stepDot: { width: 20, height: 20, borderRadius: 10, backgroundColor: C.blueGlow, borderWidth: 1, borderColor: C.blue + '55', alignItems: 'center', justifyContent: 'center', marginTop: 2 },
-  stepMsg: { color: C.text, fontSize: 14, fontWeight: '600', marginBottom: 3 },
-  stepDetail: { color: C.textMuted, fontSize: 12, lineHeight: 17 },
+  stepMsg: { color: C.text, fontSize: 14, fontFamily: 'PlusJakartaSans_600SemiBold', marginBottom: 3 },
+  stepDetail: { color: C.textMuted, fontSize: 12, lineHeight: 17, fontFamily: 'PlusJakartaSans_400Regular' },
   loadingRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
-  loadingTxt: { color: C.textSub, fontSize: 13 },
+  loadingTxt: { color: C.textSub, fontSize: 13, fontFamily: 'PlusJakartaSans_400Regular' },
   successCard: { backgroundColor: C.green + '10', borderRadius: 18, borderWidth: 1, borderColor: C.green + '44', padding: 18, marginBottom: 14 },
   successHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-  successTitle: { color: C.green, fontWeight: '800', fontSize: 16 },
+  successTitle: { color: C.green, fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 16 },
   provRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
-  provName: { color: C.text, fontWeight: '800', fontSize: 16 },
-  provEta: { color: C.green, fontSize: 13, fontWeight: '600' },
-  provPrice: { color: C.textSub, fontSize: 13, marginTop: 4 },
-  successMsg: { color: C.textSub, fontSize: 13, lineHeight: 20 },
+  provName: { color: C.text, fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 16 },
+  provEta: { color: C.green, fontSize: 13, fontFamily: 'PlusJakartaSans_600SemiBold' },
+  provPrice: { color: C.textSub, fontSize: 13, marginTop: 4, fontFamily: 'PlusJakartaSans_400Regular' },
+  successMsg: { color: C.textSub, fontSize: 13, lineHeight: 20, fontFamily: 'PlusJakartaSans_400Regular' },
   restartBtn: { backgroundColor: C.blue, borderRadius: 16, padding: 18, alignItems: 'center', marginTop: 4 },
-  restartTxt: { color: '#fff', fontWeight: '800', fontSize: 16 },
+  restartTxt: { color: '#fff', fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 16 },
 });

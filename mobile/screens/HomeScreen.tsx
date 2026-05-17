@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet, SafeAreaView, Animated, Platform, UIManager } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
+import { BlurView } from 'expo-blur';
 import { C, API_BASE, REASONINGS } from '../constants/kaamlink';
 import { AgentStepRow, SectionHeader, PulsingDot } from '../components/KaamilinkUI';
 
@@ -19,6 +22,7 @@ export default function HomeScreen({ onNext }: { onNext: (data: any) => void }) 
 
   const handleSubmit = async () => {
     if (!text.trim() || loading) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setLoading(true); setIntent(null); setStep(1);
     try {
       const r1 = await fetch(`${API_BASE}/api/request`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
@@ -38,8 +42,9 @@ export default function HomeScreen({ onNext }: { onNext: (data: any) => void }) 
   const getStep = (n: number): 'done' | 'running' | 'waiting' => step > n ? 'done' : step === n ? 'running' : 'waiting';
 
   return (
-    <SafeAreaView style={s.root}>
-      <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+    <LinearGradient colors={['#0F1220', '#080B14']} style={s.root}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
         <View style={s.header}>
           <View style={s.logoRow}>
             <View style={s.logoMark}><Text style={s.logoK}>K</Text></View>
@@ -63,18 +68,18 @@ export default function HomeScreen({ onNext }: { onNext: (data: any) => void }) 
             <View style={s.chipCard}>
               <SectionHeader icon="git-network-outline" label="INTENT EXTRACTED" />
               <View style={s.chips}>
-                <View style={[s.chip, { borderColor: C.blue + '44', backgroundColor: C.blueGlow }]}><Ionicons name="build" size={11} color={C.blue} /><Text style={[s.chipTxt, { color: C.blue }]}>{intent.service}</Text></View>
-                <View style={[s.chip, { borderColor: C.purple + '44', backgroundColor: C.purple + '15' }]}><Ionicons name="location" size={11} color={C.purple} /><Text style={[s.chipTxt, { color: C.purple }]}>{intent.location}</Text></View>
-                <View style={[s.chip, { borderColor: urgencyColor + '44', backgroundColor: urgencyColor + '15' }]}><Ionicons name="flash" size={11} color={urgencyColor} /><Text style={[s.chipTxt, { color: urgencyColor }]}>{intent.urgency}</Text></View>
-                <View style={[s.chip, { borderColor: C.green + '44', backgroundColor: C.greenGlow }]}><Ionicons name="hardware-chip" size={11} color={C.green} /><Text style={[s.chipTxt, { color: C.green }]}>{intent.complexity || 'intermediate'}</Text></View>
-                <View style={s.chip}><Ionicons name="time" size={11} color={C.textSub} /><Text style={s.chipTxt}>{intent.preferred_time}</Text></View>
-                <View style={s.chip}><Text style={[s.chipTxt, { color: C.textSub }]}>{Math.round(intent.confidence * 100)}% confidence</Text></View>
+                <View style={[s.chip, { borderLeftColor: C.blue }]}><Ionicons name="build" size={11} color={C.textSub} /><Text style={s.chipTxt}>{intent.service}</Text></View>
+                <View style={[s.chip, { borderLeftColor: C.accent }]}><Ionicons name="location" size={11} color={C.textSub} /><Text style={s.chipTxt}>{intent.location}</Text></View>
+                <View style={[s.chip, { borderLeftColor: intent.urgency === 'high' ? C.amber : C.textMuted }]}><Ionicons name="flash" size={11} color={C.textSub} /><Text style={s.chipTxt}>{intent.urgency}</Text></View>
+                <View style={[s.chip, { borderLeftColor: C.textMuted }]}><Ionicons name="hardware-chip" size={11} color={C.textSub} /><Text style={s.chipTxt}>{intent.complexity || 'intermediate'}</Text></View>
+                <View style={[s.chip, { borderLeftColor: 'transparent' }]}><Ionicons name="time" size={11} color={C.textSub} /><Text style={s.chipTxt}>{intent.preferred_time}</Text></View>
               </View>
             </View>
           )}
 
           <View style={s.traceCard}>
             <SectionHeader icon="server-outline" label="AGENT TRACE" />
+            <Text style={s.watermark}>ANTIGRAVITY</Text>
             <AgentStepRow title="[1] INTENT AGENT" desc={intent ? `${intent.service} · ${intent.location} · ${intent.urgency} urgency` : 'Awaiting input...'} status={getStep(1)} />
             <AgentStepRow title="[2] DISCOVERY AGENT" desc={step > 2 ? `Matched providers for ${intent?.service}` : step === 2 ? `Scanning providers near ${intent?.location}...` : 'Pending'} status={getStep(2)} />
             <AgentStepRow title="[3] RANKING AGENT" desc={step > 3 ? 'Ranked by proximity · rating · reliability' : 'Pending discovery'} status={getStep(3)} />
@@ -91,30 +96,32 @@ export default function HomeScreen({ onNext }: { onNext: (data: any) => void }) 
           ))}
         </View>
       </Animated.View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.bg },
+  root: { flex: 1 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingBottom: 8 },
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   logoMark: { width: 38, height: 38, borderRadius: 12, backgroundColor: C.blue + '22', borderWidth: 1, borderColor: C.blue + '44', alignItems: 'center', justifyContent: 'center' },
-  logoK: { color: C.blue, fontWeight: '900', fontSize: 20 },
-  brand: { color: C.text, fontWeight: '800', fontSize: 18 },
-  brandSub: { color: C.textMuted, fontSize: 11 },
-  agentsBadge: { backgroundColor: C.green + '15', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5, borderWidth: 1, borderColor: C.green + '33' },
-  agentsText: { color: C.green, fontSize: 11, fontWeight: '700' },
-  heading: { fontSize: 22, fontWeight: '800', color: C.text, marginBottom: 4 },
-  subheading: { fontSize: 13, color: C.textMuted, marginBottom: 18 },
-  inputCard: { backgroundColor: C.surface, borderRadius: 18, borderWidth: 1, borderColor: C.border, padding: 14, paddingBottom: 50, marginBottom: 14 },
-  input: { color: C.text, fontSize: 16, minHeight: 80, textAlignVertical: 'top', lineHeight: 24 },
+  logoK: { color: C.blue, fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 20 },
+  brand: { color: C.text, fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 18 },
+  brandSub: { color: C.textMuted, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 11 },
+  agentsBadge: { backgroundColor: 'transparent', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5, borderWidth: 1, borderColor: C.green },
+  agentsText: { color: C.green, fontSize: 11, fontFamily: 'PlusJakartaSans_700Bold' },
+  heading: { fontSize: 22, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.text, marginBottom: 4 },
+  subheading: { fontSize: 13, fontFamily: 'PlusJakartaSans_400Regular', color: C.textMuted, marginBottom: 18 },
+  inputCard: { backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 18, borderWidth: 1, borderColor: C.border, padding: 14, paddingBottom: 50, marginBottom: 14 },
+  input: { color: C.text, fontSize: 16, fontFamily: 'PlusJakartaSans_500Medium', minHeight: 80, textAlignVertical: 'top', lineHeight: 24 },
   sendBtn: { position: 'absolute', right: 12, bottom: 12, width: 42, height: 42, borderRadius: 13, backgroundColor: C.blue, alignItems: 'center', justifyContent: 'center' },
-  chipCard: { backgroundColor: C.surface, borderRadius: 16, borderWidth: 1, borderColor: C.border, padding: 14, marginBottom: 14 },
+  chipCard: { backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 16, borderWidth: 1, borderColor: C.border, padding: 14, marginBottom: 14 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: C.border, backgroundColor: C.surfaceAlt },
-  chipTxt: { fontSize: 12, fontWeight: '600', color: C.textSub },
-  traceCard: { backgroundColor: C.surface, borderRadius: 16, borderWidth: 1, borderColor: C.border, padding: 14, marginBottom: 14 },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: C.border, backgroundColor: C.surfaceAlt, borderLeftWidth: 3 },
+  chipTxt: { fontSize: 12, fontFamily: 'PlusJakartaSans_600SemiBold', color: C.textSub },
+  traceCard: { backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 16, borderWidth: 1, borderColor: C.border, padding: 14, marginBottom: 14 },
+  watermark: { position: 'absolute', top: 14, right: 14, fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, color: C.textMuted, opacity: 0.5, letterSpacing: 1 },
   tabs: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: C.border, paddingBottom: Platform.OS === 'ios' ? 20 : 10, paddingTop: 10 },
   tab: { flex: 1, alignItems: 'center' },
   tabLabel: { fontSize: 9, fontWeight: '700', color: C.textMuted, marginTop: 4, letterSpacing: 0.5 },

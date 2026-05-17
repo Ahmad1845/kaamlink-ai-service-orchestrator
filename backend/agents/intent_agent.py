@@ -109,6 +109,7 @@ def extract_intent(user_text: str) -> Intent:
         "confidence": float (between 0.0 and 1.0)
     }
     Complexity guide: basic = minor/routine fix, intermediate = requires diagnosis, complex = major repair/replacement.
+    For clear, specific requests, confidence should be 0.85 or higher. Only return below 0.75 for genuinely ambiguous inputs.
     """
 
     try:

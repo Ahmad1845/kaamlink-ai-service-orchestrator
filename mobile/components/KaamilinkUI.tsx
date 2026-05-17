@@ -19,6 +19,7 @@ type StepStatus = 'waiting' | 'running' | 'done';
 export function AgentStepRow({ title, desc, status }: { title: string; desc: string; status: StepStatus }) {
   const isRunning = status === 'running';
   const isDone = status === 'done';
+  const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   return (
     <View style={[s.row, isRunning && s.rowActive]}>
       <View style={s.iconCol}>
@@ -27,7 +28,10 @@ export function AgentStepRow({ title, desc, status }: { title: string; desc: str
         {status === 'waiting' && <Ionicons name="radio-button-off" size={16} color={C.textMuted} />}
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={[s.title, status === 'waiting' && { color: C.textMuted }]}>{title}</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text style={[s.title, status === 'waiting' && { color: C.textMuted }]}>{title}</Text>
+          <Text style={s.timestamp}>{timestamp}</Text>
+        </View>
         <Text style={[s.desc, status === 'waiting' && { color: C.textMuted }]}>{desc}</Text>
       </View>
     </View>
@@ -58,20 +62,21 @@ export function NavHeader({ title, onBack }: { title: string; onBack?: () => voi
 export function Avatar({ name, color = C.blue, size = 44 }: { name: string; color?: string; size?: number }) {
   return (
     <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: color + '33', borderWidth: 1, borderColor: color + '55', alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={{ color, fontWeight: '800', fontSize: size * 0.4 }}>{name?.charAt(0).toUpperCase()}</Text>
+      <Text style={{ color, fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: size * 0.4 }}>{name?.charAt(0).toUpperCase()}</Text>
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  row: { flexDirection: 'row', marginBottom: 14, alignItems: 'flex-start' },
-  rowActive: { backgroundColor: C.blueGlow, padding: 10, borderRadius: 12, marginHorizontal: -10, borderWidth: 1, borderColor: C.blue + '44' },
+  row: { flexDirection: 'row', paddingVertical: 10, alignItems: 'flex-start', borderTopWidth: 1, borderTopColor: C.border + '55' },
+  rowActive: { backgroundColor: C.blueGlow, borderRadius: 0, paddingHorizontal: 10, marginHorizontal: -10, borderLeftWidth: 2, borderLeftColor: C.blue, shadowColor: C.blue, shadowOpacity: 0.5, shadowRadius: 10 },
   iconCol: { width: 22, alignItems: 'center', marginRight: 10, marginTop: 2 },
-  title: { fontSize: 12, fontWeight: '700', color: C.textSub, letterSpacing: 0.5, marginBottom: 3 },
-  desc: { fontSize: 13, color: C.text, lineHeight: 18 },
+  title: { fontSize: 12, fontFamily: 'JetBrainsMono_400Regular', color: C.blue, letterSpacing: 0.5, marginBottom: 3 },
+  timestamp: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', color: C.textMuted },
+  desc: { fontSize: 13, color: C.text, lineHeight: 18, fontFamily: 'PlusJakartaSans_400Regular' },
   sectionRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  sectionLabel: { fontSize: 10, fontWeight: '800', color: C.textSub, letterSpacing: 1.2, marginLeft: 7 },
+  sectionLabel: { fontSize: 10, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.textSub, letterSpacing: 1.2, marginLeft: 7 },
   nav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
-  navTitle: { fontSize: 16, fontWeight: '700', color: C.text },
-  backBtn: { fontSize: 15, color: C.blue, fontWeight: '600', width: 60 },
+  navTitle: { fontSize: 16, fontFamily: 'PlusJakartaSans_700Bold', color: C.text },
+  backBtn: { fontSize: 15, color: C.blue, fontFamily: 'PlusJakartaSans_600SemiBold', width: 60 },
 });
