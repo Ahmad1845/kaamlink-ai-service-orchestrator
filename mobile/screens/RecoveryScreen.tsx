@@ -13,15 +13,34 @@ export default function RecoveryScreen({ data, onRestart }: { data: any; onResta
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let tick: any;
+    let isMounted = true;
+    
     fetch(`${API_BASE}/api/recover`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ booking_id: bookingId || 'demo-booking' }) })
       .then(r => r.json()).then(d => {
+        if (!isMounted) return;
+        if (!d || !d.steps) {
+            setLoading(false);
+            return;
+        }
         let i = 0;
-        const tick = setInterval(() => {
-          if (i < d.steps.length) { setSteps(prev => [...prev, d.steps[i]]); i++; }
+        tick = setInterval(() => {
+          if (i < d.steps.length) { 
+              const nextStep = d.steps[i];
+              if (nextStep) {
+                  setSteps(prev => [...prev, nextStep]); 
+              }
+              i++; 
+          }
           else { clearInterval(tick); setResult(d); setLoading(false); }
         }, 1400);
-      }).catch(() => setLoading(false));
+      }).catch(() => { if (isMounted) setLoading(false); });
+      
+    return () => {
+        isMounted = false;
+        if (tick) clearInterval(tick);
+    };
   }, []);
 
   return (
@@ -45,8 +64,8 @@ export default function RecoveryScreen({ data, onRestart }: { data: any; onResta
             <View key={i} style={s.stepRow}>
               <View style={s.stepDot}><Ionicons name="checkmark" size={10} color={C.blue} /></View>
               <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={s.stepMsg}>{step.message}</Text>
-                {step.detail ? <Text style={s.stepDetail}>{step.detail}</Text> : null}
+                <Text style={s.stepMsg}>{step?.message || 'Processing...'}</Text>
+                {step?.detail ? <Text style={s.stepDetail}>{step.detail}</Text> : null}
               </View>
             </View>
           ))}
