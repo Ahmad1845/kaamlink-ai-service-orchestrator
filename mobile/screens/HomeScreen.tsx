@@ -12,7 +12,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 // Generate a fake but realistic session ID
 const SESSION_ID = `REQ-${Math.floor(1000 + Math.random() * 9000)}-${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${Math.floor(1 + Math.random() * 9)}`;
 
-export default function HomeScreen({ onNext }: { onNext: (data: any) => void }) {
+export default function HomeScreen({ onNext, onTabChange, activeTab = 'HOME' }: { onNext: (data: any) => void; onTabChange?: (tab: string) => void; activeTab?: string }) {
   const [text, setText] = useState('AC bilkul thanda nahi kar raha, G-13 mein urgent chahiye');
   const [loading, setLoading] = useState(false);
   const [intent, setIntent] = useState<any>(null);
@@ -149,17 +149,20 @@ export default function HomeScreen({ onNext }: { onNext: (data: any) => void }) 
           {/* Tab Bar */}
           <View style={s.tabs}>
             {([
-              ['grid', 'HOME', true],
-              ['compass-outline', 'SERVICES', false],
-              ['chatbubble-outline', 'REQUESTS', false],
-              ['person-outline', 'ACCOUNT', false],
-            ] as const).map(([icon, label, active]) => (
-              <AnimatedPressable key={label} style={s.tab}>
-                <Ionicons name={icon as any} size={20} color={active ? C.blue : C.textMuted} />
-                <Text style={[s.tabLabel, active && { color: C.blue }]}>{label}</Text>
-                {active && <View style={s.tabIndicator} />}
-              </AnimatedPressable>
-            ))}
+              ['grid', 'HOME'],
+              ['compass-outline', 'SERVICES'],
+              ['chatbubble-outline', 'REQUESTS'],
+              ['person-outline', 'ACCOUNT'],
+            ] as const).map(([icon, label]) => {
+              const active = activeTab === label;
+              return (
+                <AnimatedPressable key={label} style={s.tab} onPress={() => onTabChange?.(label)}>
+                  <Ionicons name={icon as any} size={20} color={active ? C.blue : C.textMuted} />
+                  <Text style={[s.tabLabel, active && { color: C.blue }]}>{label}</Text>
+                  {active && <View style={s.tabIndicator} />}
+                </AnimatedPressable>
+              );
+            })}
           </View>
 
         </Animated.View>

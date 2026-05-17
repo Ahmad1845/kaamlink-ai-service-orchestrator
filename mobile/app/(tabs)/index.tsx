@@ -9,8 +9,10 @@ import PricingScreen from '../../screens/PricingScreen';
 import BidsScreen from '../../screens/BidsScreen';
 import ConfirmedScreen from '../../screens/ConfirmedScreen';
 import RecoveryScreen from '../../screens/RecoveryScreen';
+import ServicesScreen from '../../screens/ServicesScreen';
+import RequestsScreen from '../../screens/RequestsScreen';
 
-type Screen = 'home' | 'pricing' | 'bids' | 'confirmed' | 'recovery';
+type Screen = 'home' | 'pricing' | 'bids' | 'confirmed' | 'recovery' | 'SERVICES' | 'REQUESTS';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home');
@@ -21,10 +23,16 @@ export default function App() {
     setScreen(to);
   };
 
+  const handleTabChange = (tab: string) => {
+    if (tab === 'HOME') setScreen('home');
+    if (tab === 'SERVICES') setScreen('SERVICES');
+    if (tab === 'REQUESTS') setScreen('REQUESTS');
+  };
+
   const restart = () => { setFlowData({}); setScreen('home'); };
 
   if (screen === 'home')
-    return <HomeScreen onNext={d => go('pricing', d)} />;
+    return <HomeScreen onNext={d => go('pricing', d)} onTabChange={handleTabChange} activeTab="HOME" />;
   if (screen === 'pricing')
     return <PricingScreen data={flowData} onNext={d => go('bids', d)} onBack={() => setScreen('home')} />;
   if (screen === 'bids')
@@ -33,6 +41,10 @@ export default function App() {
     return <ConfirmedScreen data={flowData} onSimulateCancel={() => setScreen('recovery')} onRestart={restart} />;
   if (screen === 'recovery')
     return <RecoveryScreen data={flowData} onRestart={restart} />;
+  if (screen === 'SERVICES')
+    return <ServicesScreen onTabChange={handleTabChange} activeTab="SERVICES" />;
+  if (screen === 'REQUESTS')
+    return <RequestsScreen bookingData={flowData} onTabChange={handleTabChange} activeTab="REQUESTS" />;
 
   return null;
 }
