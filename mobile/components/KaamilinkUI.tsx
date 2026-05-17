@@ -68,24 +68,25 @@ export function Avatar({ name, color = C.blue, size = 44 }: { name: string; colo
   );
 }
 
+const AnimatedPressableComponent = Animated.createAnimatedComponent(Pressable);
+
 export function AnimatedPressable({ children, style, ...props }: PressableProps & { children: React.ReactNode; style?: any }) {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   return (
-    <Pressable
+    <AnimatedPressableComponent
       {...props}
-      onPressIn={(e) => {
+      style={[style, { transform: [{ scale: scaleAnim }] }]}
+      onPressIn={(e: any) => {
         Animated.spring(scaleAnim, { toValue: 0.95, useNativeDriver: true }).start();
         props.onPressIn?.(e);
       }}
-      onPressOut={(e) => {
+      onPressOut={(e: any) => {
         Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, tension: 100, friction: 5 }).start();
         props.onPressOut?.(e);
       }}
     >
-      <Animated.View style={[style, { transform: [{ scale: scaleAnim }] }]}>
-        {children}
-      </Animated.View>
-    </Pressable>
+      {children}
+    </AnimatedPressableComponent>
   );
 }
 
