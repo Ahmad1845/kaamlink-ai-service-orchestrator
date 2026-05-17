@@ -87,8 +87,10 @@ export default function RecoveryScreen({ data, onRestart }: { data: any; onResta
 
 const s = StyleSheet.create({
   root: { flex: 1 },
+  warningBanner: { backgroundColor: C.amber + '15', borderRadius: 20, padding: 24, marginBottom: 14, alignItems: 'center', borderWidth: 1, borderColor: C.amber + '44' },
   warnTitle: { fontSize: 22, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.amber, marginBottom: 6 },
   warnSub: { fontSize: 13, color: C.textSub, textAlign: 'center', lineHeight: 20, fontFamily: 'PlusJakartaSans_400Regular' },
+  traceCard: { backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 18, borderWidth: 1, borderColor: C.blue + '44', padding: 16, marginBottom: 14 },
   traceHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
   traceTitle: { color: C.blue, fontFamily: 'JetBrainsMono_400Regular', fontSize: 13 },
   stepRow: { flexDirection: 'row', marginBottom: 14, alignItems: 'flex-start' },
@@ -97,6 +99,7 @@ const s = StyleSheet.create({
   stepDetail: { color: C.textMuted, fontSize: 12, lineHeight: 17, fontFamily: 'PlusJakartaSans_400Regular' },
   loadingRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
   loadingTxt: { color: C.textSub, fontSize: 13, fontFamily: 'PlusJakartaSans_400Regular' },
+  successCard: { backgroundColor: C.green + '10', borderRadius: 18, borderWidth: 1, borderColor: C.green + '44', padding: 18, marginBottom: 14 },
   successHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
   successTitle: { color: C.green, fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 16 },
   provRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },

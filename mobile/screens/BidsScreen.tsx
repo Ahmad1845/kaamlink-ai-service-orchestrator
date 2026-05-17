@@ -120,11 +120,15 @@ export default function BidsScreen({ data, onNext, onBack }: { data: any; onNext
 
 const s = StyleSheet.create({
   root: { flex: 1 },
+  statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 14, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: C.border },
   liveRow: { flexDirection: 'row', alignItems: 'center' },
   liveTxt: { color: C.green, fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 13, letterSpacing: 1 },
   timer: { color: C.text, fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 22 },
+  contextCard: { backgroundColor: C.blueGlow, borderRadius: 14, borderWidth: 1, borderColor: C.blue + '33', padding: 14, marginBottom: 12 },
   contextService: { color: C.blue, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 },
   contextBudget: { color: C.textSub, fontSize: 13, marginTop: 4, fontFamily: 'PlusJakartaSans_400Regular' },
+  agentCard: { backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 14, borderWidth: 1, borderColor: C.border, padding: 14, marginBottom: 16 },
+  waitBox: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 30, backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 16, borderWidth: 1, borderColor: C.border },
   waitTxt: { color: C.textSub, fontSize: 14, fontFamily: 'PlusJakartaSans_600SemiBold' },
   bidCardWrapper: { marginBottom: 14, borderRadius: 18, overflow: 'hidden' },
   gradientBorder: { padding: 1.5, borderRadius: 18 },
