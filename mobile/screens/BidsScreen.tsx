@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { C, API_BASE } from '../constants/kaamlink';
-import { NavHeader, Avatar, AgentStepRow, PulsingDot } from '../components/KaamilinkUI';
+import { NavHeader, Avatar, AgentStepRow, PulsingDot, GlassCard, AnimatedPressable } from '../components/KaamilinkUI';
 
 const PulsingText = ({ text, color }: { text: string; color: string }) => {
   const opacity = useRef(new Animated.Value(0.4)).current;
@@ -52,23 +52,25 @@ export default function BidsScreen({ data, onNext, onBack }: { data: any; onNext
         <NavHeader title="Live Bids" onBack={onBack} />
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
 
-        <View style={s.statusBar}>
+        <GlassCard style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <View style={s.liveRow}><PulsingDot color={C.green} /><Text style={s.liveTxt}> LIVE</Text></View>
           <Text style={s.timer}>{mm}:{ss}</Text>
-        </View>
+        </GlassCard>
 
-        <View style={s.contextCard}>
+        <GlassCard style={{ backgroundColor: 'rgba(79, 110, 247, 0.1)', borderColor: C.blue + '33' }}>
           <Text style={s.contextService}>{intent.service} · {intent.location}</Text>
           <Text style={s.contextBudget}>Your offer: PKR {userBudget?.toLocaleString() || pricing?.suggested_offer?.toLocaleString() || 'open'}</Text>
-        </View>
+        </GlassCard>
 
-        <View style={s.agentCard}>
+        <GlassCard>
           <AgentStepRow title="[6] RADIUS EXPANSION AGENT" desc={shown > 0 ? `${shown} bid${shown > 1 ? 's' : ''} received — expanding search if needed` : 'Contacting nearby providers...'} status={shown > 0 ? 'done' : 'running'} />
           <AgentStepRow title="[BID SIMULATION AGENT]" desc={shown >= 3 ? 'All bids ranked · Best Value identified' : `Waiting for bids... (${shown}/3)`} status={shown >= 3 ? 'done' : shown > 0 ? 'running' : 'waiting'} />
-        </View>
+        </GlassCard>
 
         {shown === 0 && (
-          <View style={s.waitBox}><PulsingDot color={C.blue} /><Text style={s.waitTxt}>  Waiting for providers to respond...</Text></View>
+          <GlassCard style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 30 }}>
+            <PulsingDot color={C.blue} /><Text style={s.waitTxt}>  Waiting for providers to respond...</Text>
+          </GlassCard>
         )}
 
         {bids.slice(0, shown).map((bid, i) => {
@@ -90,9 +92,9 @@ export default function BidsScreen({ data, onNext, onBack }: { data: any; onNext
                 <Text style={s.bidAmount}>PKR {bid.amount?.toLocaleString()}</Text>
                 <PulsingText text="2 min left" color={C.amber} />
               </View>
-              <TouchableOpacity style={[s.acceptBtn, i === 0 && s.acceptBtnPrimary]} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onNext({ ...data, selectedBid: bid }); }}>
+              <AnimatedPressable style={[s.acceptBtn, i === 0 && s.acceptBtnPrimary]} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onNext({ ...data, selectedBid: bid }); }}>
                 <Text style={s.acceptTxt}>{i === 0 ? '⚡ Accept Best Bid' : 'Accept Bid'}</Text>
-              </TouchableOpacity>
+              </AnimatedPressable>
             </View>
           );
 
@@ -118,15 +120,11 @@ export default function BidsScreen({ data, onNext, onBack }: { data: any; onNext
 
 const s = StyleSheet.create({
   root: { flex: 1 },
-  statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 14, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: C.border },
   liveRow: { flexDirection: 'row', alignItems: 'center' },
   liveTxt: { color: C.green, fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 13, letterSpacing: 1 },
   timer: { color: C.text, fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 22 },
-  contextCard: { backgroundColor: C.blueGlow, borderRadius: 14, borderWidth: 1, borderColor: C.blue + '33', padding: 14, marginBottom: 12 },
   contextService: { color: C.blue, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 },
   contextBudget: { color: C.textSub, fontSize: 13, marginTop: 4, fontFamily: 'PlusJakartaSans_400Regular' },
-  agentCard: { backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 14, borderWidth: 1, borderColor: C.border, padding: 14, marginBottom: 16 },
-  waitBox: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 30, backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 16, borderWidth: 1, borderColor: C.border },
   waitTxt: { color: C.textSub, fontSize: 14, fontFamily: 'PlusJakartaSans_600SemiBold' },
   bidCardWrapper: { marginBottom: 14, borderRadius: 18, overflow: 'hidden' },
   gradientBorder: { padding: 1.5, borderRadius: 18 },

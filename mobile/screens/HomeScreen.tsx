@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';
 import { C, API_BASE, REASONINGS } from '../constants/kaamlink';
-import { AgentStepRow, SectionHeader, PulsingDot } from '../components/KaamilinkUI';
+import { AgentStepRow, SectionHeader, PulsingDot, GlassCard, AnimatedPressable } from '../components/KaamilinkUI';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -57,15 +57,15 @@ export default function HomeScreen({ onNext }: { onNext: (data: any) => void }) 
           <Text style={s.heading}>Apna masla batayein</Text>
           <Text style={s.subheading}>Roman Urdu, Urdu, or English — we understand all</Text>
 
-          <View style={s.inputCard}>
+          <GlassCard style={{ paddingBottom: 50 }}>
             <TextInput style={s.input} value={text} onChangeText={setText} multiline placeholder="e.g. AC thanda nahi kar raha, G-13 mein urgent..." placeholderTextColor={C.textMuted} />
-            <TouchableOpacity style={[s.sendBtn, loading && { opacity: 0.5 }]} onPress={handleSubmit} disabled={loading}>
+            <AnimatedPressable style={[s.sendBtn, loading && { opacity: 0.5 }]} onPress={handleSubmit} disabled={loading}>
               {loading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="send" size={18} color="#fff" />}
-            </TouchableOpacity>
-          </View>
+            </AnimatedPressable>
+          </GlassCard>
 
           {intent && (
-            <View style={s.chipCard}>
+            <GlassCard>
               <SectionHeader icon="git-network-outline" label="INTENT EXTRACTED" />
               <View style={s.chips}>
                 <View style={[s.chip, { borderLeftColor: C.blue }]}><Ionicons name="build" size={11} color={C.textSub} /><Text style={s.chipTxt}>{intent.service}</Text></View>
@@ -74,25 +74,25 @@ export default function HomeScreen({ onNext }: { onNext: (data: any) => void }) 
                 <View style={[s.chip, { borderLeftColor: C.textMuted }]}><Ionicons name="hardware-chip" size={11} color={C.textSub} /><Text style={s.chipTxt}>{intent.complexity || 'intermediate'}</Text></View>
                 <View style={[s.chip, { borderLeftColor: 'transparent' }]}><Ionicons name="time" size={11} color={C.textSub} /><Text style={s.chipTxt}>{intent.preferred_time}</Text></View>
               </View>
-            </View>
+            </GlassCard>
           )}
 
-          <View style={s.traceCard}>
+          <GlassCard>
             <SectionHeader icon="server-outline" label="AGENT TRACE" />
             <Text style={s.watermark}>ANTIGRAVITY</Text>
             <AgentStepRow title="[1] INTENT AGENT" desc={intent ? `${intent.service} · ${intent.location} · ${intent.urgency} urgency` : 'Awaiting input...'} status={getStep(1)} />
             <AgentStepRow title="[2] DISCOVERY AGENT" desc={step > 2 ? `Matched providers for ${intent?.service}` : step === 2 ? `Scanning providers near ${intent?.location}...` : 'Pending'} status={getStep(2)} />
             <AgentStepRow title="[3] RANKING AGENT" desc={step > 3 ? 'Ranked by proximity · rating · reliability' : 'Pending discovery'} status={getStep(3)} />
             <AgentStepRow title="[4] BOOKING AGENT" desc="Ready to confirm your selection" status={step >= 4 ? 'done' : 'waiting'} />
-          </View>
+          </GlassCard>
         </ScrollView>
 
         <View style={s.tabs}>
           {[['grid', 'HOME', true], ['compass-outline', 'SERVICES', false], ['chatbubble-outline', 'REQUESTS', false], ['person-outline', 'ACCOUNT', false]].map(([icon, label, active]) => (
-            <View key={label as string} style={s.tab}>
+            <AnimatedPressable key={label as string} style={s.tab}>
               <Ionicons name={icon as any} size={20} color={active ? C.blue : C.textMuted} />
               <Text style={[s.tabLabel, active && { color: C.blue }]}>{label as string}</Text>
-            </View>
+            </AnimatedPressable>
           ))}
         </View>
       </Animated.View>
@@ -113,14 +113,11 @@ const s = StyleSheet.create({
   agentsText: { color: C.green, fontSize: 11, fontFamily: 'PlusJakartaSans_700Bold' },
   heading: { fontSize: 22, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.text, marginBottom: 4 },
   subheading: { fontSize: 13, fontFamily: 'PlusJakartaSans_400Regular', color: C.textMuted, marginBottom: 18 },
-  inputCard: { backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 18, borderWidth: 1, borderColor: C.border, padding: 14, paddingBottom: 50, marginBottom: 14 },
   input: { color: C.text, fontSize: 16, fontFamily: 'PlusJakartaSans_500Medium', minHeight: 80, textAlignVertical: 'top', lineHeight: 24 },
   sendBtn: { position: 'absolute', right: 12, bottom: 12, width: 42, height: 42, borderRadius: 13, backgroundColor: C.blue, alignItems: 'center', justifyContent: 'center' },
-  chipCard: { backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 16, borderWidth: 1, borderColor: C.border, padding: 14, marginBottom: 14 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: C.border, backgroundColor: C.surfaceAlt, borderLeftWidth: 3 },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: C.border, backgroundColor: 'rgba(22, 27, 46, 0.5)', borderLeftWidth: 3 },
   chipTxt: { fontSize: 12, fontFamily: 'PlusJakartaSans_600SemiBold', color: C.textSub },
-  traceCard: { backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 16, borderWidth: 1, borderColor: C.border, padding: 14, marginBottom: 14 },
   watermark: { position: 'absolute', top: 14, right: 14, fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, color: C.textMuted, opacity: 0.5, letterSpacing: 1 },
   tabs: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: C.border, paddingBottom: Platform.OS === 'ios' ? 20 : 10, paddingTop: 10 },
   tab: { flex: 1, alignItems: 'center' },

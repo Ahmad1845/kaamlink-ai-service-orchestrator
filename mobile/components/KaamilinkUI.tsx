@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, View, Text, StyleSheet, Platform } from 'react-native';
+import { Animated, View, Text, StyleSheet, Platform, Pressable, PressableProps } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { C } from '../constants/kaamlink';
 
 export function PulsingDot({ color = C.blue }: { color?: string }) {
@@ -67,6 +68,38 @@ export function Avatar({ name, color = C.blue, size = 44 }: { name: string; colo
   );
 }
 
+export function AnimatedPressable({ children, style, ...props }: PressableProps & { children: React.ReactNode; style?: any }) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  return (
+    <Pressable
+      {...props}
+      onPressIn={(e) => {
+        Animated.spring(scaleAnim, { toValue: 0.95, useNativeDriver: true }).start();
+        props.onPressIn?.(e);
+      }}
+      onPressOut={(e) => {
+        Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, tension: 100, friction: 5 }).start();
+        props.onPressOut?.(e);
+      }}
+    >
+      <Animated.View style={[style, { transform: [{ scale: scaleAnim }] }]}>
+        {children}
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+export function GlassCard({ children, style }: { children: React.ReactNode; style?: any }) {
+  return (
+    <View style={[s.glassCardWrapper, style]}>
+      <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
+      <View style={s.glassCardInner}>
+        {children}
+      </View>
+    </View>
+  );
+}
+
 const s = StyleSheet.create({
   row: { flexDirection: 'row', paddingVertical: 10, alignItems: 'flex-start', borderTopWidth: 1, borderTopColor: C.border + '55' },
   rowActive: { backgroundColor: C.blueGlow, borderRadius: 0, paddingHorizontal: 10, marginHorizontal: -10, borderLeftWidth: 2, borderLeftColor: C.blue, shadowColor: C.blue, shadowOpacity: 0.5, shadowRadius: 10 },
@@ -79,4 +112,6 @@ const s = StyleSheet.create({
   nav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
   navTitle: { fontSize: 16, fontFamily: 'PlusJakartaSans_700Bold', color: C.text },
   backBtn: { fontSize: 15, color: C.blue, fontFamily: 'PlusJakartaSans_600SemiBold', width: 60 },
+  glassCardWrapper: { borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: C.border, marginBottom: 14 },
+  glassCardInner: { padding: 14, backgroundColor: 'rgba(15, 18, 32, 0.4)' },
 });

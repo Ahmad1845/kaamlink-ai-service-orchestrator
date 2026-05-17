@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { C, API_BASE } from '../constants/kaamlink';
-import { Avatar } from '../components/KaamilinkUI';
+import { Avatar, GlassCard, AnimatedPressable } from '../components/KaamilinkUI';
 
 export default function RecoveryScreen({ data, onRestart }: { data: any; onRestart: () => void }) {
   const { selectedBid, bookingId } = data;
@@ -29,14 +29,14 @@ export default function RecoveryScreen({ data, onRestart }: { data: any; onResta
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
 
-        <View style={s.warningBanner}>
+        <GlassCard style={{ backgroundColor: C.amber + '15', alignItems: 'center', borderColor: C.amber + '44' }}>
           <Ionicons name="warning" size={32} color={C.amber} style={{ marginBottom: 8 }} />
           <Text style={s.warnTitle}>Provider Cancelled</Text>
           <Text style={s.warnSub}>{selectedBid?.provider_name} cancelled unexpectedly.</Text>
           <Text style={s.warnSub}>Recovery Agent is finding a replacement...</Text>
-        </View>
+        </GlassCard>
 
-        <View style={s.traceCard}>
+        <GlassCard style={{ borderColor: C.blue + '44' }}>
           <View style={s.traceHeader}>
             <Ionicons name="refresh-circle" size={18} color={C.blue} />
             <Text style={s.traceTitle}> [7] RECOVERY AGENT — Live Trace</Text>
@@ -51,10 +51,10 @@ export default function RecoveryScreen({ data, onRestart }: { data: any; onResta
             </View>
           ))}
           {loading && <View style={s.loadingRow}><ActivityIndicator size="small" color={C.blue} /><Text style={s.loadingTxt}> Agent working...</Text></View>}
-        </View>
+        </GlassCard>
 
         {result?.success && result.replacement_provider && (
-          <View style={s.successCard}>
+          <GlassCard style={{ backgroundColor: C.green + '10', borderColor: C.green + '44' }}>
             <View style={s.successHeader}>
               <Ionicons name="checkmark-circle" size={22} color={C.green} />
               <Text style={s.successTitle}> Replacement Confirmed!</Text>
@@ -71,13 +71,13 @@ export default function RecoveryScreen({ data, onRestart }: { data: any; onResta
               </View>
             </View>
             <Text style={s.successMsg}>{result.message}</Text>
-          </View>
+          </GlassCard>
         )}
 
         {!loading && (
-          <TouchableOpacity style={s.restartBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onRestart(); }}>
+          <AnimatedPressable style={s.restartBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onRestart(); }}>
             <Text style={s.restartTxt}>Start New Request →</Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         )}
       </ScrollView>
       </SafeAreaView>
@@ -87,10 +87,8 @@ export default function RecoveryScreen({ data, onRestart }: { data: any; onResta
 
 const s = StyleSheet.create({
   root: { flex: 1 },
-  warningBanner: { backgroundColor: C.amber + '15', borderRadius: 20, padding: 24, marginBottom: 14, alignItems: 'center', borderWidth: 1, borderColor: C.amber + '44' },
   warnTitle: { fontSize: 22, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.amber, marginBottom: 6 },
   warnSub: { fontSize: 13, color: C.textSub, textAlign: 'center', lineHeight: 20, fontFamily: 'PlusJakartaSans_400Regular' },
-  traceCard: { backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 18, borderWidth: 1, borderColor: C.blue + '44', padding: 16, marginBottom: 14 },
   traceHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
   traceTitle: { color: C.blue, fontFamily: 'JetBrainsMono_400Regular', fontSize: 13 },
   stepRow: { flexDirection: 'row', marginBottom: 14, alignItems: 'flex-start' },
@@ -99,7 +97,6 @@ const s = StyleSheet.create({
   stepDetail: { color: C.textMuted, fontSize: 12, lineHeight: 17, fontFamily: 'PlusJakartaSans_400Regular' },
   loadingRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
   loadingTxt: { color: C.textSub, fontSize: 13, fontFamily: 'PlusJakartaSans_400Regular' },
-  successCard: { backgroundColor: C.green + '10', borderRadius: 18, borderWidth: 1, borderColor: C.green + '44', padding: 18, marginBottom: 14 },
   successHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
   successTitle: { color: C.green, fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 16 },
   provRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
