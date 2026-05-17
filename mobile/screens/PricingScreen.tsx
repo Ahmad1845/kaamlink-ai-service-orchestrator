@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, SafeAreaView, Animated } from 'react-native';
+import { View, Text, TextInput, ScrollView, StyleSheet, SafeAreaView, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -16,9 +16,10 @@ export default function PricingScreen({ data, onNext, onBack }: { data: any; onN
 
   useEffect(() => {
     Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }).start();
-    fetch(`${API_BASE}/api/pricing`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ service: intent.service, complexity: intent.complexity || 'intermediate', urgency: intent.urgency, location: intent.location }) })
-      .then(r => r.json()).then(setPricing).catch(() => {});
+    fetch(`${API_BASE}/api/pricing`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ service: intent.service, complexity: intent.complexity || 'intermediate', urgency: intent.urgency, location: intent.location }),
+    }).then(r => r.json()).then(setPricing).catch(() => {});
   }, []);
 
   const updateBudget = (val: string) => {
@@ -35,100 +36,131 @@ export default function PricingScreen({ data, onNext, onBack }: { data: any; onN
   const barWidth = barAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] });
   const accepted = budget ? parseInt(budget) : pricing?.suggested_offer;
 
+  const urgencyBg = intent.urgency === 'high' ? C.amberGlow : C.greenGlow;
+  const urgencyBorder = intent.urgency === 'high' ? C.amber : C.green;
+  const urgencyText = intent.urgency === 'high' ? C.amberDark : '#065F46';
+
   return (
-    <LinearGradient colors={['#0F1220', '#080B14']} style={s.root}>
+    <View style={s.root}>
       <SafeAreaView style={{ flex: 1 }}>
-        <NavHeader title="✨ Fair Price Estimate" onBack={onBack} />
+        <NavHeader title="Fair Price Estimate ✨" onBack={onBack} />
         <Animated.ScrollView style={{ opacity: fadeAnim }} contentContainerStyle={{ padding: 16, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
 
-        <GlassCard>
-          <AgentStepRow title="[5] PRICING AGENT" desc={pricing ? `Market rate computed for ${intent.service}` : 'Calculating market price...'} status={pricing ? 'done' : 'running'} />
-        </GlassCard>
+          <GlassCard>
+            <AgentStepRow
+              title="PRICING AGENT"
+              desc={pricing ? `Market rate computed for ${intent.service}` : 'Calculating market price...'}
+              status={pricing ? 'done' : 'running'}
+            />
+          </GlassCard>
 
-        <View style={s.serviceRow}>
-          <View style={s.complexityBadge}><Text style={s.complexityTxt}>{intent.complexity || 'intermediate'}</Text></View>
-          <Text style={s.serviceName}>{intent.service}</Text>
-          <View style={[s.urgencyBadge, intent.urgency === 'high' && { backgroundColor: C.red + '22', borderColor: C.red + '44' }]}>
-            <Text style={[s.urgencyTxt, intent.urgency === 'high' && { color: C.red }]}>{intent.urgency} urgency</Text>
+          {/* Service info row */}
+          <View style={s.serviceRow}>
+            <View style={[s.urgencyBadge, { backgroundColor: urgencyBg, borderColor: urgencyBorder }]}>
+              <Ionicons name="flash" size={11} color={urgencyText} />
+              <Text style={[s.urgencyTxt, { color: urgencyText }]}>
+                {intent.urgency === 'high' ? 'High Urgency' : intent.urgency + ' urgency'}
+              </Text>
+            </View>
+            <Text style={s.serviceName}>{intent.service}</Text>
+            <View style={[s.complexityBadge]}>
+              <Text style={s.complexityTxt}>{intent.complexity || 'intermediate'}</Text>
+            </View>
           </View>
-        </View>
 
-        {pricing ? (
-          <>
-            <GlassCard>
-              <Text style={s.rangeLabel}>MARKET RANGE</Text>
-              <Text style={s.rangeValue}>PKR {pricing.market_min.toLocaleString()} – {pricing.market_max.toLocaleString()}</Text>
-              <View style={s.factors}>{pricing.factors?.map((f: string, i: number) => <View key={i} style={s.factorChip}><Text style={s.factorTxt}>• {f}</Text></View>)}</View>
-            </GlassCard>
-
-            <GlassCard style={{ borderColor: C.blue + '44', backgroundColor: 'rgba(79, 110, 247, 0.1)', marginBottom: 14 }}>
-              <View style={s.aiRow}><Ionicons name="sparkles" size={14} color={C.blue} /><Text style={s.aiLabel}> AI SUGGESTED OFFER</Text></View>
-              <Text style={s.suggestPrice}>PKR {pricing.suggested_offer.toLocaleString()}</Text>
-              <Text style={s.recommendation}>{pricing.recommendation}</Text>
-            </GlassCard>
-
-            <GlassCard style={{ marginBottom: 20 }}>
-              <Text style={s.budgetLabel}>Custom Budget (optional)</Text>
-              <TextInput style={s.budgetInput} value={budget} onChangeText={updateBudget} keyboardType="numeric" placeholder={`${pricing.suggested_offer}`} placeholderTextColor={C.textMuted} />
-              {prob !== null && (
-                <View style={{ marginTop: 10 }}>
-                  <View style={s.probTrack}>
-                    <Animated.View style={[s.probFill, { width: barWidth }]}>
-                      <LinearGradient colors={[C.red, C.amber, C.green]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
-                    </Animated.View>
-                  </View>
-                  <Text style={[s.probTxt, { color: probColor }]}>{prob}% acceptance probability</Text>
+          {pricing ? (
+            <>
+              <GlassCard>
+                <Text style={s.rangeLabel}>MARKET RANGE</Text>
+                <Text style={s.rangeValue}>Rs. {pricing.market_min.toLocaleString()} – {pricing.market_max.toLocaleString()}</Text>
+                <View style={s.factors}>
+                  {pricing.factors?.map((f: string, i: number) => (
+                    <View key={i} style={s.factorChip}><Text style={s.factorTxt}>• {f}</Text></View>
+                  ))}
                 </View>
-              )}
-            </GlassCard>
-          </>
-        ) : (
-          <View style={s.loadingCard}><Text style={{ color: C.textSub }}>Pricing Agent working...</Text></View>
-        )}
+              </GlassCard>
 
-        <AnimatedPressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onNext({ ...data, pricing, userBudget: accepted }); }}>
-          <LinearGradient colors={[C.blue, C.accent]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.btn}>
-            <Text style={s.btnTxt}>{accepted ? `Accept PKR ${accepted.toLocaleString()} →` : 'Continue →'}</Text>
-          </LinearGradient>
-        </AnimatedPressable>
-        <AnimatedPressable style={s.btnGhost} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNext({ ...data, pricing, userBudget: null }); }}>
-          <Text style={s.btnGhostTxt}>Skip Pricing</Text>
-        </AnimatedPressable>
-      </Animated.ScrollView>
+              <GlassCard style={{ borderColor: C.blue + '44', backgroundColor: C.blueGlow }}>
+                <View style={s.aiRow}>
+                  <Ionicons name="sparkles" size={13} color={C.blue} />
+                  <Text style={s.aiLabel}> AI SUGGESTED OFFER</Text>
+                </View>
+                <Text style={s.suggestPrice}>Rs. {pricing.suggested_offer.toLocaleString()}</Text>
+                <Text style={s.recommendation}>{pricing.recommendation}</Text>
+              </GlassCard>
+
+              <GlassCard>
+                <Text style={s.budgetLabel}>Your Custom Budget (optional)</Text>
+                <TextInput
+                  style={s.budgetInput}
+                  value={budget}
+                  onChangeText={updateBudget}
+                  keyboardType="numeric"
+                  placeholder={`Suggested: ${pricing.suggested_offer}`}
+                  placeholderTextColor={C.textMuted}
+                />
+                {prob !== null && (
+                  <View style={{ marginTop: 12 }}>
+                    <View style={s.probTrack}>
+                      <Animated.View style={[s.probFill, { width: barWidth }]}>
+                        <LinearGradient colors={[C.red, C.amber, C.green]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
+                      </Animated.View>
+                    </View>
+                    <Text style={[s.probTxt, { color: probColor }]}>{prob}% acceptance probability</Text>
+                  </View>
+                )}
+              </GlassCard>
+            </>
+          ) : (
+            <GlassCard style={{ height: 100, alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={{ color: C.textMuted, fontFamily: 'PlusJakartaSans_400Regular' }}>Pricing Agent working...</Text>
+            </GlassCard>
+          )}
+
+          <AnimatedPressable
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onNext({ ...data, pricing, userBudget: accepted }); }}
+            style={s.btn}
+          >
+            <Text style={s.btnTxt}>{accepted ? `Accept Rs. ${accepted.toLocaleString()} →` : 'Continue →'}</Text>
+          </AnimatedPressable>
+
+          <AnimatedPressable
+            style={s.btnGhost}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNext({ ...data, pricing, userBudget: null }); }}
+          >
+            <Text style={s.btnGhostTxt}>Skip Pricing</Text>
+          </AnimatedPressable>
+
+        </Animated.ScrollView>
       </SafeAreaView>
-    </LinearGradient>
+    </View>
   );
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1 },
-  agentCard: { backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 14, borderWidth: 1, borderColor: C.border, padding: 14, marginBottom: 14 },
-  serviceRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 },
-  serviceName: { flex: 1, color: C.text, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 },
-  complexityBadge: { backgroundColor: C.purple + '22', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4, borderWidth: 1, borderColor: C.purple + '44' },
+  root: { flex: 1, backgroundColor: C.bg },
+  serviceRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
+  serviceName: { flex: 1, color: C.text, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14 },
+  urgencyBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5, borderWidth: 1 },
+  urgencyTxt: { fontSize: 11, fontFamily: 'PlusJakartaSans_700Bold' },
+  complexityBadge: { backgroundColor: C.purpleGlow, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5, borderWidth: 1, borderColor: C.purple + '44' },
   complexityTxt: { color: C.purple, fontSize: 11, fontFamily: 'PlusJakartaSans_700Bold' },
-  urgencyBadge: { backgroundColor: C.amber + '22', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4, borderWidth: 1, borderColor: C.amber + '44' },
-  urgencyTxt: { color: C.amber, fontSize: 11, fontFamily: 'PlusJakartaSans_700Bold' },
-  rangeCard: { backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 16, borderWidth: 1, borderColor: C.border, padding: 18, marginBottom: 14 },
-  rangeLabel: { fontSize: 10, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.accent, letterSpacing: 1.2, marginBottom: 6 },
-  rangeValue: { fontSize: 36, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.text, marginBottom: 12 },
-  factors: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  factorChip: { paddingHorizontal: 4, paddingVertical: 2 },
+  rangeLabel: { fontSize: 10, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.textMuted, letterSpacing: 1.5, marginBottom: 6 },
+  rangeValue: { fontSize: 28, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.text, marginBottom: 10 },
+  factors: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
+  factorChip: { paddingVertical: 2 },
   factorTxt: { color: C.textSub, fontSize: 12, fontFamily: 'PlusJakartaSans_400Regular' },
-  suggestCard: { backgroundColor: C.blueGlow, borderRadius: 16, borderWidth: 1, borderColor: C.blue + '44', padding: 18, marginBottom: 14 },
   aiRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
   aiLabel: { fontSize: 10, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.blue, letterSpacing: 1 },
-  suggestPrice: { fontSize: 32, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.blue, marginBottom: 8 },
+  suggestPrice: { fontSize: 30, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.blueDark, marginBottom: 6 },
   recommendation: { fontSize: 13, color: C.textSub, lineHeight: 20, fontFamily: 'PlusJakartaSans_400Regular' },
-  budgetCard: { backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 16, borderWidth: 1, borderColor: C.border, padding: 16, marginBottom: 20 },
   budgetLabel: { fontSize: 12, fontFamily: 'PlusJakartaSans_700Bold', color: C.textSub, marginBottom: 10 },
-  budgetInput: { backgroundColor: 'rgba(22, 25, 38, 0.8)', borderRadius: 12, padding: 14, color: C.text, fontSize: 20, fontFamily: 'PlusJakartaSans_700Bold', borderWidth: 1, borderColor: C.border },
-  probTrack: { height: 8, backgroundColor: C.border, borderRadius: 4, overflow: 'hidden', marginBottom: 6 },
-  probFill: { height: 8, borderRadius: 4 },
-  probTxt: { fontSize: 13, fontFamily: 'PlusJakartaSans_700Bold' },
-  loadingCard: { height: 100, backgroundColor: 'rgba(15, 18, 32, 0.6)', borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 14, borderWidth: 1, borderColor: C.border },
-  btn: { backgroundColor: C.blue, borderRadius: 16, padding: 18, alignItems: 'center', marginBottom: 12 },
+  budgetInput: { backgroundColor: C.surfaceAlt, borderRadius: 12, padding: 14, color: C.text, fontSize: 18, fontFamily: 'PlusJakartaSans_700Bold', borderWidth: 1, borderColor: C.border },
+  probTrack: { height: 6, backgroundColor: C.border, borderRadius: 3, overflow: 'hidden', marginBottom: 6 },
+  probFill: { height: 6, borderRadius: 3 },
+  probTxt: { fontSize: 12, fontFamily: 'PlusJakartaSans_700Bold' },
+  btn: { backgroundColor: C.blue, borderRadius: 14, padding: 18, alignItems: 'center', marginBottom: 10 },
   btnTxt: { color: '#fff', fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 16 },
-  btnGhost: { borderRadius: 16, padding: 16, alignItems: 'center', borderWidth: 1, borderColor: C.border },
+  btnGhost: { borderRadius: 14, padding: 16, alignItems: 'center', borderWidth: 1.5, borderColor: C.border },
   btnGhostTxt: { color: C.textSub, fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15 },
 });

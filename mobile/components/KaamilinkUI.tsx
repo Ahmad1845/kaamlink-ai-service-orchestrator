@@ -1,118 +1,118 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, View, Text, StyleSheet, Platform, Pressable, PressableProps } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Pressable, Animated, PressableProps, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
 import { C } from '../constants/kaamlink';
 
-export function PulsingDot({ color = C.blue }: { color?: string }) {
-  const opacity = useRef(new Animated.Value(0.3)).current;
-  useEffect(() => {
-    Animated.loop(Animated.sequence([
-      Animated.timing(opacity, { toValue: 1, duration: 700, useNativeDriver: true }),
-      Animated.timing(opacity, { toValue: 0.3, duration: 700, useNativeDriver: true }),
-    ])).start();
-  }, []);
-  return <Animated.View style={{ opacity, width: 8, height: 8, borderRadius: 4, backgroundColor: color }} />;
+// ── Card ──────────────────────────────────────────────────────────────────────
+export function GlassCard({ children, style }: { children: React.ReactNode; style?: any }) {
+  return <View style={[s.card, style]}>{children}</View>;
 }
 
-type StepStatus = 'waiting' | 'running' | 'done';
-
-export function AgentStepRow({ title, desc, status }: { title: string; desc: string; status: StepStatus }) {
-  const isRunning = status === 'running';
-  const isDone = status === 'done';
-  const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+// ── Nav Header ────────────────────────────────────────────────────────────────
+export function NavHeader({ title, onBack }: { title: string; onBack?: () => void }) {
   return (
-    <View style={[s.row, isRunning && s.rowActive]}>
-      <View style={s.iconCol}>
-        {isDone   && <Ionicons name="checkmark-circle" size={16} color={C.green} />}
-        {isRunning && <PulsingDot color={C.blue} />}
-        {status === 'waiting' && <Ionicons name="radio-button-off" size={16} color={C.textMuted} />}
-      </View>
-      <View style={{ flex: 1 }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text style={[s.title, status === 'waiting' && { color: C.textMuted }]}>{title}</Text>
-          <Text style={s.timestamp}>{timestamp}</Text>
-        </View>
-        <Text style={[s.desc, status === 'waiting' && { color: C.textMuted }]}>{desc}</Text>
-      </View>
+    <View style={s.navHeader}>
+      {onBack ? (
+        <TouchableOpacity onPress={onBack} style={s.backBtn}>
+          <Ionicons name="arrow-back" size={20} color={C.text} />
+        </TouchableOpacity>
+      ) : <View style={s.backBtn} />}
+      <Text style={s.navTitle}>{title}</Text>
+      <View style={s.backBtn} />
     </View>
   );
 }
 
+// ── Section Header ────────────────────────────────────────────────────────────
 export function SectionHeader({ icon, label }: { icon: string; label: string }) {
   return (
-    <View style={s.sectionRow}>
-      <Ionicons name={icon as any} size={13} color={C.green} />
+    <View style={s.sectionHeader}>
+      <Ionicons name={icon as any} size={13} color={C.blue} />
       <Text style={s.sectionLabel}>{label}</Text>
     </View>
   );
 }
 
-export function NavHeader({ title, onBack }: { title: string; onBack?: () => void }) {
+// ── Avatar ────────────────────────────────────────────────────────────────────
+export function Avatar({ name, color, size = 44 }: { name: string; color: string; size?: number }) {
+  const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
   return (
-    <View style={s.nav}>
-      {onBack
-        ? <Text style={s.backBtn} onPress={onBack}>← Back</Text>
-        : <View style={{ width: 60 }} />}
-      <Text style={s.navTitle}>{title}</Text>
-      <View style={{ width: 60 }} />
+    <View style={[s.avatar, { width: size, height: size, borderRadius: size / 2, backgroundColor: color + '18', borderColor: color + '33' }]}>
+      <Text style={[s.avatarTxt, { color, fontSize: size * 0.36 }]}>{initials}</Text>
     </View>
   );
 }
 
-export function Avatar({ name, color = C.blue, size = 44 }: { name: string; color?: string; size?: number }) {
+// ── Agent Step Row ─────────────────────────────────────────────────────────────
+export function AgentStepRow({ title, desc, status }: { title: string; desc: string; status: 'done' | 'running' | 'waiting' }) {
+  const dotColor = status === 'done' ? C.green : status === 'running' ? C.blue : C.border;
+  const txtColor = status === 'waiting' ? C.textMuted : C.text;
   return (
-    <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: color + '33', borderWidth: 1, borderColor: color + '55', alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={{ color, fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: size * 0.4 }}>{name?.charAt(0).toUpperCase()}</Text>
+    <View style={s.stepRow}>
+      <View style={[s.stepDot, { backgroundColor: dotColor }]}>
+        {status === 'done' && <Ionicons name="checkmark" size={10} color="#fff" />}
+        {status === 'running' && <PulsingDot color="#fff" size={6} />}
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={[s.stepTitle, { color: txtColor, fontFamily: 'JetBrainsMono_400Regular' }]}>{title}</Text>
+        <Text style={s.stepDesc}>{desc}</Text>
+      </View>
+      {status === 'done' && <Ionicons name="checkmark-circle" size={16} color={C.green} />}
     </View>
   );
 }
 
-const AnimatedPressableComponent = Animated.createAnimatedComponent(Pressable);
+// ── Pulsing Dot ───────────────────────────────────────────────────────────────
+export function PulsingDot({ color, size = 8 }: { color: string; size?: number }) {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+  React.useEffect(() => {
+    Animated.loop(Animated.sequence([
+      Animated.timing(opacity, { toValue: 1, duration: 700, useNativeDriver: true }),
+      Animated.timing(opacity, { toValue: 0.3, duration: 700, useNativeDriver: true }),
+    ])).start();
+  }, []);
+  return <Animated.View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: color, opacity }} />;
+}
+
+// ── Animated Pressable ────────────────────────────────────────────────────────
+const AnimatedPressableBase = Animated.createAnimatedComponent(Pressable);
 
 export function AnimatedPressable({ children, style, ...props }: PressableProps & { children: React.ReactNode; style?: any }) {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const scale = useRef(new Animated.Value(1)).current;
   return (
-    <AnimatedPressableComponent
+    <AnimatedPressableBase
       {...props}
-      style={[style, { transform: [{ scale: scaleAnim }] }]}
-      onPressIn={(e: any) => {
-        Animated.spring(scaleAnim, { toValue: 0.95, useNativeDriver: true }).start();
-        props.onPressIn?.(e);
-      }}
-      onPressOut={(e: any) => {
-        Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, tension: 100, friction: 5 }).start();
-        props.onPressOut?.(e);
-      }}
+      style={[style, { transform: [{ scale }] }]}
+      onPressIn={(e: any) => { Animated.spring(scale, { toValue: 0.96, useNativeDriver: true, speed: 50 }).start(); props.onPressIn?.(e); }}
+      onPressOut={(e: any) => { Animated.spring(scale, { toValue: 1, useNativeDriver: true, tension: 100, friction: 5 }).start(); props.onPressOut?.(e); }}
     >
       {children}
-    </AnimatedPressableComponent>
-  );
-}
-
-export function GlassCard({ children, style }: { children: React.ReactNode; style?: any }) {
-  return (
-    <View style={[s.glassCardWrapper, style]}>
-      <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
-      <View style={s.glassCardInner}>
-        {children}
-      </View>
-    </View>
+    </AnimatedPressableBase>
   );
 }
 
 const s = StyleSheet.create({
-  row: { flexDirection: 'row', paddingVertical: 10, alignItems: 'flex-start', borderTopWidth: 1, borderTopColor: C.border + '55' },
-  rowActive: { backgroundColor: C.blueGlow, borderRadius: 0, paddingHorizontal: 10, marginHorizontal: -10, borderLeftWidth: 2, borderLeftColor: C.blue, shadowColor: C.blue, shadowOpacity: 0.5, shadowRadius: 10 },
-  iconCol: { width: 22, alignItems: 'center', marginRight: 10, marginTop: 2 },
-  title: { fontSize: 12, fontFamily: 'JetBrainsMono_400Regular', color: C.blue, letterSpacing: 0.5, marginBottom: 3 },
-  timestamp: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', color: C.textMuted },
-  desc: { fontSize: 13, color: C.text, lineHeight: 18, fontFamily: 'PlusJakartaSans_400Regular' },
-  sectionRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  sectionLabel: { fontSize: 10, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.textSub, letterSpacing: 1.2, marginLeft: 7 },
-  nav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
-  navTitle: { fontSize: 16, fontFamily: 'PlusJakartaSans_700Bold', color: C.text },
-  backBtn: { fontSize: 15, color: C.blue, fontFamily: 'PlusJakartaSans_600SemiBold', width: 60 },
-  glassCardWrapper: { borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: C.border, marginBottom: 14 },
-  glassCardInner: { padding: 14, backgroundColor: 'rgba(15, 18, 32, 0.4)' },
+  card: {
+    backgroundColor: C.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: C.border,
+    padding: 16,
+    marginBottom: 12,
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8 },
+      android: { elevation: 2 },
+    }),
+  },
+  navHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, backgroundColor: C.surface, borderBottomWidth: 1, borderBottomColor: C.border },
+  backBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  navTitle: { flex: 1, textAlign: 'center', color: C.text, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16 },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
+  sectionLabel: { fontSize: 10, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.blue, letterSpacing: 1.2 },
+  avatar: { alignItems: 'center', justifyContent: 'center', borderWidth: 1.5 },
+  avatarTxt: { fontFamily: 'PlusJakartaSans_800ExtraBold' },
+  stepRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 12 },
+  stepDot: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
+  stepTitle: { fontSize: 11, fontFamily: 'JetBrainsMono_400Regular', marginBottom: 2 },
+  stepDesc: { fontSize: 12, color: C.textMuted, fontFamily: 'PlusJakartaSans_400Regular', lineHeight: 17 },
 });
