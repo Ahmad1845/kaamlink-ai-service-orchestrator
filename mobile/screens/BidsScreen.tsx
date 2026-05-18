@@ -120,7 +120,7 @@ export default function BidsScreen({ data, onNext, onBack }: { data: any; onNext
                         {[1,2,3,4,5].map(n => (
                           <Ionicons key={n} name={n <= Math.round(provider.rating || 4.5) ? 'star' : 'star-outline'} size={11} color={C.amber} />
                         ))}
-                        <Text style={s.ratingTxt}> {provider.rating || '4.8'} ({Math.floor(80 + Math.random() * 150)} reviews)</Text>
+                        <Text style={s.ratingTxt}> {provider.rating || '4.8'} ({Math.floor(80 + (provider.rating || 4.8) * 15 + i * 47)} reviews)</Text>
                       </View>
                     </View>
                     <View style={s.settingsIcon}>

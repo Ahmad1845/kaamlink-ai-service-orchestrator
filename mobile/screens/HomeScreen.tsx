@@ -28,17 +28,25 @@ export default function HomeScreen({ onNext, onTabChange, activeTab = 'HOME' }: 
     try {
       const r1 = await fetch(`${API_BASE}/api/request`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
       const intentData = await r1.json();
+      if (!r1.ok) throw new Error(typeof intentData.detail === 'string' ? intentData.detail : JSON.stringify(intentData.detail) || 'Intent API Failed');
+      
       if (intentData.service === 'invalid') { alert('Please describe a home service need.'); setStep(0); setLoading(false); return; }
       setIntent(intentData); setStep(2);
+      
       const r2 = await fetch(`${API_BASE}/api/providers`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(intentData) });
       const rawProviders = await r2.json();
+      if (!r2.ok) throw new Error(typeof rawProviders.detail === 'string' ? rawProviders.detail : JSON.stringify(rawProviders.detail) || 'Providers API Failed');
+      
       setStep(3); await new Promise(r => setTimeout(r, 700)); setStep(4);
-      const providers = rawProviders.map((p: any, i: number) => ({
-        ...p,
-        distance: (p.distance_km ?? (i + 1) * 0.9).toFixed(1) + 'km',
-        eta: Math.round((p.distance_km ?? (i + 1) * 0.9) * 8 + 5) + ' mins',
-        reasoning: REASONINGS[Math.min(i, REASONINGS.length - 1)],
-      }));
+      const providers = rawProviders.map((p: any, i: number) => {
+        const d = Number(p.distance_km) || ((i + 1) * 0.9);
+        return {
+          ...p,
+          distance: d.toFixed(1) + 'km',
+          eta: Math.round(d * 8 + 5) + ' mins',
+          reasoning: REASONINGS[Math.min(i, REASONINGS.length - 1)],
+        };
+      });
       onNext({ intent: intentData, providers });
     } catch (e: any) { alert('Failed: ' + e.message); setStep(0); }
     setLoading(false);
