@@ -152,7 +152,7 @@ export default function BidsScreen({ data, onNext, onBack }: { data: any; onNext
                     </View>
                     <Text style={s.metaDot}>·</Text>
                     <View style={s.metaItem}>
-                      <Text style={s.metaPrice}>Rs. {Math.min(bid.amount, pricing?.market_min || bid.amount).toLocaleString()} – {bid.amount.toLocaleString()}</Text>
+                      <Text style={s.metaPrice}>Rs. {Math.floor(bid.amount * 0.9).toLocaleString()} – {Math.floor(bid.amount * 1.1).toLocaleString()}</Text>
                     </View>
                   </View>
 

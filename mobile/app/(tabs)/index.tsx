@@ -38,7 +38,7 @@ export default function App() {
   if (screen === 'bids')
     return <BidsScreen data={flowData} onNext={d => go('confirmed', d)} onBack={() => setScreen('pricing')} />;
   if (screen === 'confirmed')
-    return <ConfirmedScreen data={flowData} onSimulateCancel={() => setScreen('recovery')} onRestart={restart} />;
+    return <ConfirmedScreen data={flowData} onSimulateCancel={(bookingId: string) => go('recovery', { bookingId })} onRestart={restart} />;
   if (screen === 'recovery')
     return <RecoveryScreen data={flowData} onRestart={restart} />;
   if (screen === 'SERVICES')

@@ -1,6 +1,5 @@
 import os
 import json
-import re
 from models import Intent
 from dotenv import load_dotenv
 
@@ -16,69 +15,9 @@ load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key) if api_key and genai else None
 
-# ── Keyword fallback (used when Gemini API is unavailable) ────────────────────
-
-_SERVICE_KEYWORDS = {
-    "AC repair":        ["ac", "air condition", "cooling", "thanda", "compressor", "gas filling"],
-    "plumbing":         ["plumber", "plumbing", "pipe", "leakage", "water motor", "geyser", "nali"],
-    "electrician":      ["electrician", "wiring", "bijli", "short circuit", "fan", "switchboard", "ups"],
-    "home cleaning":    ["cleaning", "safai", "maid", "sofa clean", "carpet", "deep clean"],
-    "carpentry":        ["carpenter", "carpentry", "furniture", "wood", "door", "cabinet", "almirah"],
-    "painting":         ["painter", "painting", "paint", "polish", "distemper"],
-    "pest control":     ["pest", "termite", "fumigation", "cockroach", "bug"],
-    "car wash":         ["car wash", "car clean", "auto detail", "gaari"],
-    "towing":           ["towing", "tow", "breakdown", "roadside", "vehicle recovery"],
-}
-
-_LOCATION_PATTERN = re.compile(
-    r'\b([GFIEHDH]-?\s?\d+|DHA|Bahria Town|Saddar|Rawalpindi Cantt|RWP|PWD|CDA)\b',
-    re.IGNORECASE
-)
-
-def _normalize_location(raw: str) -> str:
-    """Normalize common Pakistani sector formats to canonical form e.g. G13 → G-13."""
-    # Remove spaces between letter and number, ensure hyphen: G 13 / G13 → G-13
-    normalized = re.sub(
-        r'\b([A-HI])\s*-?\s*(\d+)\b',
-        lambda m: f"{m.group(1).upper()}-{m.group(2)}",
-        raw,
-        flags=re.IGNORECASE
-    )
-    return normalized.strip()
-
-def _fallback_extract(user_text: str) -> Intent:
-    """Rule-based intent extractor — used as fallback when Gemini is down."""
-    text_lower = user_text.lower()
-
-    detected_service = "invalid"
-    for service, keywords in _SERVICE_KEYWORDS.items():
-        if any(kw in text_lower for kw in keywords):
-            detected_service = service
-            break
-
-    loc_match = _LOCATION_PATTERN.search(user_text)
-    if loc_match:
-        detected_location = _normalize_location(loc_match.group(0))
-    else:
-        detected_location = "unknown"
-
-    urgency = "high" if any(w in text_lower for w in ["urgent", "jaldi", "asap", "abhi"]) else "medium"
-
-    return Intent(
-        service=detected_service,
-        issue="detected via keyword fallback",
-        location=detected_location,
-        preferred_time="asap",
-        budget_sensitive=False,
-        urgency=urgency,
-        complexity="intermediate",
-        confidence=0.6
-    )
-
-
-# ── Main extractor ────────────────────────────────────────────────────────────
 
 def extract_intent(user_text: str) -> Intent:
+    """Uses a single Gemini API call to extract intent from natural language."""
     system_instruction = """
     You are an AI Intent Extractor for the Kaamlink Service Orchestrator in Pakistan.
     Your job is to read natural language service requests (in Roman Urdu or English) and extract the key details.
@@ -117,30 +56,19 @@ def extract_intent(user_text: str) -> Intent:
     For clear, specific requests, confidence should be 0.85 or higher. Only return below 0.75 for genuinely ambiguous inputs.
     """
 
-    try:
-        if not client or not types:
-            raise ValueError("GEMINI_API_KEY is not configured.")
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=user_text,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                system_instruction=system_instruction,
-                temperature=0.1
-            ),
-        )
-        data = json.loads(response.text)
-        # Safety net: normalize location even if Gemini returns un-hyphenated form
-        if data.get("location") and data["location"].lower() != "unknown":
-            data["location"] = _normalize_location(data["location"])
+    if not client or not types:
+        raise ValueError("GEMINI_API_KEY is not configured.")
 
-        return Intent(**data)
-
-    except Exception as e:
-        err = str(e)
-        # Quota / permission errors — gracefully degrade to keyword fallback
-        if any(k in err for k in ["403", "quota", "PERMISSION_DENIED", "429", "rate", "Resource"]):
-            print(f"[WARN] Gemini API unavailable ({err[:80]}). Using keyword fallback.")
-            return _fallback_extract(user_text)
-        raise
+    response = client.models.generate_content(
+        model='gemini-2.5-flash',
+        contents=user_text,
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+            system_instruction=system_instruction,
+            temperature=0.1
+        ),
+    )
+    
+    data = json.loads(response.text)
+    return Intent(**data)
 

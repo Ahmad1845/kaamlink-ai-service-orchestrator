@@ -17,7 +17,7 @@ export default function RecoveryScreen({ data, onRestart }: { data: any; onResta
 
     fetch(`${API_BASE}/api/recover`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ booking_id: bookingId || 'demo-booking' }),
+      body: JSON.stringify({ booking_id: bookingId }),
     }).then(r => r.json()).then(d => {
       if (!isMounted) return;
       if (!d || !d.steps) { setLoading(false); return; }

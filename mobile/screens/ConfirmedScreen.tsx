@@ -14,7 +14,7 @@ const TIMELINE = [
   { label: 'Job Complete',         urdu: 'Kaam ho gaya! ⭐',            color: C.amber },
 ];
 
-export default function ConfirmedScreen({ data, onRestart, onSimulateCancel }: { data: any; onRestart: () => void; onSimulateCancel: () => void }) {
+export default function ConfirmedScreen({ data, onRestart, onSimulateCancel }: { data: any; onRestart: () => void; onSimulateCancel: (bookingId: string) => void }) {
   const { intent, selectedBid, pricing, userBudget } = data;
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [tlStep, setTlStep] = useState(1);
@@ -145,10 +145,27 @@ export default function ConfirmedScreen({ data, onRestart, onSimulateCancel }: {
             />
           </GlassCard>
 
-          <AnimatedPressable style={s.cancelBtn} onPress={() => { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning); onSimulateCancel(); }}>
-            <Ionicons name="warning-outline" size={15} color={C.amber} />
-            <Text style={s.cancelTxt}> Simulate Provider Cancellation</Text>
-          </AnimatedPressable>
+          {tlStep >= TIMELINE.length ? (
+            <GlassCard style={{ borderColor: C.amber + '66', backgroundColor: C.amberGlow, paddingVertical: 20, alignItems: 'center', marginBottom: 10 }}>
+              <Text style={{ fontSize: 18, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.amberDark, marginBottom: 8 }}>
+                Rate {selectedBid.provider_name.split(' ')[0]} ⭐
+              </Text>
+              <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
+                {[1, 2, 3, 4, 5].map(n => <Ionicons key={n} name="star" size={32} color={C.amber} />)}
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20 }}>
+                <Ionicons name="shield-checkmark" size={16} color={C.green} />
+                <Text style={{ fontSize: 13, fontFamily: 'PlusJakartaSans_600SemiBold', color: C.green, marginLeft: 6 }}>
+                  Service warranty valid for 30 days
+                </Text>
+              </View>
+            </GlassCard>
+          ) : (
+            <AnimatedPressable style={s.cancelBtn} onPress={() => { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning); onSimulateCancel(bookingId || ''); }}>
+              <Ionicons name="warning-outline" size={15} color={C.amber} />
+              <Text style={s.cancelTxt}> Simulate Provider Cancellation</Text>
+            </AnimatedPressable>
+          )}
 
           <AnimatedPressable style={s.restartBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onRestart(); }}>
             <Text style={s.restartTxt}>New Request</Text>
