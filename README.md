@@ -1,167 +1,141 @@
-# Kaamlink — AI Service Orchestrator
+# Kaamlink - AI Service Orchestrator
 
-> Pakistan's first AI-powered home service booking platform. Describe your problem in Roman Urdu — 7 AI agents find, price, bid, book, and recover your service automatically.
+Pakistan-focused hackathon prototype for agentic home service booking with Roman Urdu support, dynamic pricing, bidding, booking, notifications, recovery, service quality, and dispute workflows.
 
-[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=flat-square)](https://fastapi.tiangolo.com)
-[![Gemini](https://img.shields.io/badge/AI-Gemini%202.5%20Flash-4285F4?style=flat-square)](https://ai.google.dev)
-[![Expo](https://img.shields.io/badge/Mobile-Expo%20Go-000020?style=flat-square)](https://expo.dev)
-[![Supabase](https://img.shields.io/badge/DB-Supabase-3ECF8E?style=flat-square)](https://supabase.com)
+## Architecture Summary
 
----
+- Mobile: React Native (Expo) 5-screen demo flow
+- Backend: FastAPI orchestration API
+- LLM layer: Gemini 2.5 Flash for intent extraction (fallback rules included)
+- Data layer: Supabase PostgreSQL (with in-memory fallback for local demos)
+- Orchestration layer: `antigravity_orchestrator.py` simulating Google Antigravity-style multi-agent execution traces
 
-## What Is Kaamlink?
+## Antigravity Workflow (Implemented in Code)
 
-Kaamlink is an agentic AI orchestration system for Pakistan's informal service economy. A user types their problem in Roman Urdu (e.g. *"AC thanda nahi kar raha, G-13 mein urgent"*) and a chain of 7 AI agents handles the rest — automatically.
+Main workflow endpoint: `POST /api/orchestrate`
 
----
+1. Intent Agent: extracts service, location, urgency, complexity, confidence.
+2. Discovery Agent: finds service-matching providers.
+3. Ranking Agent: multi-factor ranking using 9 signals.
+4. Scheduling Agent: conflict prevention, alternate slots, waitlist decisions.
+5. Pricing Agent: market range, suggested offer, acceptance probability.
+6. Booking Agent: booking creation and scheduling-aware confirmation.
+7. Notification Agent: queue and dispatch simulated booking lifecycle notifications.
+8. Recovery Agent: cancellation handling and replacement provider assignment.
+9. Trust Agent: service completion feedback and provider rating impact.
+10. Dispute Agent: no-show/quality/price/cancellation dispute lifecycle.
+11. Provider Optimization Agent: workload balancing and slot recommendations.
 
-## 7-Agent Pipeline
+Trace output includes explicit agent decisions and reasoning text.
 
-```
-User Input (Roman Urdu)
-        │
-        ▼
-┌─────────────────────┐
-│  Agent 1+2          │  Intent + Complexity Agent
-│  Gemini 2.5 Flash   │  → service, location, urgency, complexity
-└────────┬────────────┘
-         │
-         ▼
-┌─────────────────────┐
-│  Agent 5            │  Pricing Agent
-│  Market Intelligence│  → price range, suggested offer, acceptance %
-└────────┬────────────┘
-         │
-         ▼
-┌─────────────────────┐
-│  Agent 6            │  Radius Expansion Agent
-│  Progressive Search │  → 500m → 1.5km → 3km → 10km
-└────────┬────────────┘
-         │
-         ▼
-┌─────────────────────┐
-│  Agent 3            │  Discovery + Ranking Agent
-│  Score & Rank       │  → top 3 providers by proximity + rating
-└────────┬────────────┘
-         │
-         ▼
-┌─────────────────────┐
-│  Agent 4            │  Booking Agent
-│  Confirm & Log      │  → booking_id confirmed in Supabase
-└────────┬────────────┘
-         │
-    [If Cancellation]
-         ▼
-┌─────────────────────┐
-│  Agent 7            │  Recovery Agent
-│  Auto-Recovery      │  → replacement found + step trace
-└─────────────────────┘
-```
+## Matching Factors (Advanced Ranking)
 
----
+Provider ranking now uses:
 
-## Mobile App — 5 Screens
+1. Distance proximity
+2. Rating
+3. Review recency
+4. On-time reliability score
+5. Specialization score
+6. Price fairness
+7. Capacity available
+8. Risk score
+9. Workload balance score
 
-| Screen | What It Shows |
-|---|---|
-| **Home** | Roman Urdu input + live 4-agent trace panel + intent chips |
-| **Pricing** | Market range, AI suggested price, live acceptance probability bar |
-| **Live Bids** | 3 bid cards animate in one-by-one, Best Value badge, countdown |
-| **Confirmed** | Receipt + 5-step Roman Urdu notification timeline |
-| **Recovery** | Recovery Agent trace + replacement provider found |
+For urgent jobs, reliability and distance are weighted higher.
 
----
+## API Reference
+
+### Core flow
+
+- `POST /api/request` - Intent extraction (backward compatible for mobile flow)
+- `POST /api/orchestrate` - Full multi-agent orchestration + traces
+- `POST /api/providers` - Provider discovery and ranking
+- `POST /api/pricing` - Dynamic pricing and acceptance probability
+- `POST /api/bids` - Bid simulation
+- `POST /api/book` - Scheduling-aware booking
+- `GET /api/booking/{id}` - Booking status
+- `POST /api/recover` - Cancellation recovery
+- `POST /api/discover-radius` - Progressive radius search
+- `GET /api/logs` - Agent logs
+
+### New workflow endpoints
+
+- `GET /api/notifications` - Notification queue/status
+- `POST /api/notifications/dispatch` - Dispatch queued notifications
+- `POST /api/service/complete` - Completion checklist + feedback + rating update
+- `POST /api/dispute/open` - Open dispute
+- `POST /api/dispute/update` - Resolve/escalate/freeze dispute
+- `GET /api/disputes` - List disputes
+- `GET /api/provider/optimize/{provider_id}` - Workload and demand recommendations
+
+## Database Schema
+
+SQL template: `backend/schema.sql`
+
+Core tables:
+
+- `providers`
+- `bookings`
+- `agent_logs`
+- `notifications`
+- `service_reports`
+- `disputes`
+- `orchestration_traces`
 
 ## Quick Start
 
-### Prerequisites
-- Python 3.11+
-- Node.js 18+
-- Expo Go app on Android/iOS
-- `.env` file in `backend/` with `GEMINI_API_KEY`, `SUPABASE_URL`, `SUPABASE_KEY`
-
 ### Backend
+
 ```bash
 cd backend
 python -m venv venv
-venv\Scripts\activate        # Windows
+venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 ### Mobile
+
 ```bash
 cd mobile
 npm install
-# Set your WiFi IP in mobile/constants/kaamlink.ts → API_BASE
+# set your local backend IP in mobile/constants/kaamlink.ts
 npx expo start --lan --port 8082
-# Scan QR code with Expo Go
 ```
 
----
+## Cost and Latency Analysis (Hackathon Assumptions)
 
-## API Reference
+- Intent call (Gemini): typically 0.5s to 1.8s
+- Non-LLM steps (ranking, scheduling, bidding): under 100ms each in memory mode
+- End-to-end orchestration target: 3s to 8s in demo mode
+- Cost optimization:
+  - only intent/pricing reasoning uses LLM
+  - deterministic fallback enabled for quota or network failure
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/request` | Extract intent from Roman Urdu text |
-| POST | `/api/providers` | Discover and rank providers |
-| POST | `/api/pricing` | Get market price range and acceptance probability |
-| POST | `/api/bids` | Simulate provider bids |
-| POST | `/api/book` | Confirm booking |
-| POST | `/api/recover` | Trigger cancellation recovery |
-| POST | `/api/discover-radius` | Expanding radius provider search |
-| GET | `/api/booking/{id}` | Get booking status |
-| GET | `/api/logs` | Agent action logs |
+## Baseline vs Agentic Upgrade
 
----
+- Baseline listing app: static provider list sorted by distance/price
+- Kaamlink agentic flow:
+  - intent-aware matching
+  - dynamic pricing guidance
+  - scheduling conflict handling
+  - cancellation recovery
+  - dispute and trust feedback loops
 
-## Project Structure
+## Privacy Note
 
-```
-kaamlink-ai-service-orchestrator/
-├── backend/
-│   ├── main.py                    # FastAPI app — all endpoints
-│   ├── models.py                  # Pydantic models
-│   ├── memory_db.py               # 18 mock providers + in-memory fallback
-│   ├── database.py                # Supabase client
-│   ├── requirements.txt
-│   ├── Dockerfile                 # Google Cloud Run
-│   └── agents/
-│       ├── intent_agent.py        # Agent 1+2: Gemini + location normalization
-│       ├── discovery_agent.py     # Agent 3: Discovery + ranking
-│       ├── pricing_agent.py       # Agent 5: Dynamic pricing
-│       ├── radius_agent.py        # Agent 6: Radius expansion
-│       └── recovery_agent.py      # Agent 7: Cancellation recovery
-├── mobile/
-│   ├── constants/kaamlink.ts      # API_BASE + design tokens
-│   ├── components/KaamilinkUI.tsx # Shared UI components
-│   ├── screens/
-│   │   ├── HomeScreen.tsx
-│   │   ├── PricingScreen.tsx
-│   │   ├── BidsScreen.tsx
-│   │   ├── ConfirmedScreen.tsx
-│   │   └── RecoveryScreen.tsx
-│   └── app/(tabs)/index.tsx       # 5-screen orchestrator
-├── docs/                          # All planning and audit artifacts
-└── ARTIFACTS.md                   # Master artifact index
-```
+- Prototype uses mock/test data only.
+- No real payment, identity verification, or sensitive PII processing is required for demo.
+- Any user text should be treated as transient request content.
 
----
+## Limitations
 
-## Tech Stack
-
-| Component | Technology |
-|---|---|
-| Mobile | React Native + Expo SDK 54 |
-| Backend | FastAPI (Python 3.11) |
-| AI Model | Gemini 2.5 Flash |
-| Database | Supabase PostgreSQL |
-| Deployment | Google Cloud Run |
-| Orchestration | Google Antigravity |
-
----
+- Google Antigravity cloud runtime is simulated in this repository via local orchestrator abstraction.
+- Maps travel time is mocked from distance for hackathon speed.
+- Notification channels are simulated; no live SMS/WhatsApp provider is connected.
+- Dispute resolution is rule-based simulation, not human-ops integrated.
 
 ## Artifacts
 
-See [`ARTIFACTS.md`](ARTIFACTS.md) for a full index of every planning document, implementation plan, and audit artifact produced during development.
+See `ARTIFACTS.md` and `docs/` for planning, walkthroughs, and audit history.

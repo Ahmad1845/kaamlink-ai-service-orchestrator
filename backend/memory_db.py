@@ -2,6 +2,11 @@ agent_logs_memory = []
 bookings_memory = []
 radius_logs_memory = []
 bids_memory = []
+notifications_memory = []
+service_reports_memory = []
+disputes_memory = []
+waitlist_memory = []
+orchestration_traces_memory = []
 
 providers_memory = [
     # ── AC Repair ──────────────────────────────────────────────────────────────
@@ -294,3 +299,23 @@ providers_memory = [
         "distance_km": 4.5
     },
 ]
+
+# Add advanced matching metadata defaults for hackathon ranking factors.
+DEFAULT_PROVIDER_META = {
+    "availability_slots": ["morning", "afternoon", "evening"],
+    "review_recency_days": 20,
+    "on_time_score": 0.86,
+    "capacity_available": 3,
+    "risk_score": 0.20,
+    "specialization_score": 0.82,
+    "workload_score": 0.55,
+}
+
+for idx, provider in enumerate(providers_memory):
+    provider.setdefault("availability_slots", ["morning", "afternoon"] if idx % 2 == 0 else ["afternoon", "evening"])
+    provider.setdefault("review_recency_days", max(5, DEFAULT_PROVIDER_META["review_recency_days"] + (idx % 7) * 4))
+    provider.setdefault("on_time_score", round(max(0.65, DEFAULT_PROVIDER_META["on_time_score"] - (idx % 5) * 0.03), 2))
+    provider.setdefault("capacity_available", max(1, DEFAULT_PROVIDER_META["capacity_available"] - (idx % 3)))
+    provider.setdefault("risk_score", round(min(0.55, provider.get("cancellation_rate", 0.1) * 2.5), 2))
+    provider.setdefault("specialization_score", round(min(0.97, 0.70 + (idx % 6) * 0.04), 2))
+    provider.setdefault("workload_score", round(min(0.95, 0.35 + (idx % 8) * 0.07), 2))

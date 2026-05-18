@@ -1,15 +1,20 @@
 import os
 import json
 import re
-from google import genai
-from google.genai import types
 from models import Intent
 from dotenv import load_dotenv
+
+try:
+    from google import genai
+    from google.genai import types
+except Exception:
+    genai = None
+    types = None
 
 load_dotenv()
 
 api_key = os.getenv("GEMINI_API_KEY")
-client = genai.Client(api_key=api_key)
+client = genai.Client(api_key=api_key) if api_key and genai else None
 
 # ── Keyword fallback (used when Gemini API is unavailable) ────────────────────
 
@@ -113,6 +118,8 @@ def extract_intent(user_text: str) -> Intent:
     """
 
     try:
+        if not client or not types:
+            raise ValueError("GEMINI_API_KEY is not configured.")
         response = client.models.generate_content(
             model='gemini-2.5-flash',
             contents=user_text,

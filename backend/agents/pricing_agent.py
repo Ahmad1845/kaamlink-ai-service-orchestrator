@@ -2,14 +2,19 @@ import os
 import json
 import uuid
 import datetime
-from google import genai
-from google.genai import types
 from dotenv import load_dotenv
+
+try:
+    from google import genai
+    from google.genai import types
+except Exception:
+    genai = None
+    types = None
 
 load_dotenv()
 
 api_key = os.getenv("GEMINI_API_KEY")
-client = genai.Client(api_key=api_key)
+client = genai.Client(api_key=api_key) if api_key and genai else None
 
 # ── Base pricing table per service (PKR) ──────────────────────────────────────
 BASE_PRICES = {
@@ -31,7 +36,8 @@ URGENCY_MULTIPLIERS = {
 }
 
 def _fallback_pricing(service: str, urgency: str, user_budget: int | None):
-    base = BASE_PRICES.get(service.lower(), {"min": 800, "max": 2000})
+    service_key = (service or "").strip()
+    base = BASE_PRICES.get(service_key, {"min": 800, "max": 2000})
     mult = URGENCY_MULTIPLIERS.get(urgency.lower(), 1.0)
     market_min = int(base["min"] * mult)
     market_max = int(base["max"] * mult)
@@ -118,6 +124,8 @@ Return ONLY valid JSON matching this schema exactly:
 """
 
     try:
+        if not client or not types:
+            raise ValueError("GEMINI_API_KEY is not configured.")
         response = client.models.generate_content(
             model='gemini-2.5-flash',
             contents="Calculate pricing.",
