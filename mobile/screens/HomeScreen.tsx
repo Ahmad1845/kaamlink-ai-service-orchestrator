@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, ScrollView, ActivityIndicator, StyleSheet, SafeAreaView, Animated, Platform, UIManager } from 'react-native';
+import { View, Text, TextInput, ScrollView, ActivityIndicator, StyleSheet, SafeAreaView, Animated, Platform, UIManager, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { C, API_BASE, REASONINGS } from '../constants/kaamlink';
-import { AgentStepRow, SectionHeader, GlassCard, AnimatedPressable } from '../components/KaamilinkUI';
+import { AgentStepRow, SectionHeader, GlassCard, AnimatedPressable, PulsingDot } from '../components/KaamilinkUI';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -18,8 +18,14 @@ export default function HomeScreen({ onNext, onTabChange, activeTab = 'HOME' }: 
   const [intent, setIntent] = useState<any>(null);
   const [step, setStep] = useState(0);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const spinAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => { Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }).start(); }, []);
+  useEffect(() => {
+    if (loading) Animated.loop(Animated.timing(spinAnim, { toValue: 1, duration: 1500, useNativeDriver: true })).start();
+    else spinAnim.setValue(0);
+  }, [loading]);
+  const spin = spinAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
 
   const handleSubmit = async () => {
     if (!text.trim() || loading) return;
@@ -69,15 +75,11 @@ export default function HomeScreen({ onNext, onTabChange, activeTab = 'HOME' }: 
           {/* Header */}
           <View style={s.header}>
             <View style={s.logoRow}>
-              <View style={s.logoMark}>
-                <Text style={s.logoK}>K</Text>
-              </View>
-              <View>
-                <Text style={s.brand}>Kaamlink</Text>
-                <Text style={s.brandSub}>AI Service Orchestrator</Text>
-              </View>
+              <Image source={require('../assets/images/icon.png')} style={{ width: 36, height: 36, borderRadius: 8 }} />
+              <Text style={s.brand}>Kaamlink</Text>
             </View>
             <View style={s.agentsBadge}>
+              <PulsingDot color={C.blue} size={6} />
               <Text style={s.agentsText}>7 Agents Active</Text>
             </View>
           </View>
@@ -96,9 +98,9 @@ export default function HomeScreen({ onNext, onTabChange, activeTab = 'HOME' }: 
                 placeholder="e.g. AC thanda nahi kar raha, G-13 mein urgent..."
                 placeholderTextColor={C.textMuted}
               />
-              <AnimatedPressable style={[s.sendBtn, loading && { opacity: 0.5 }]} onPress={handleSubmit} disabled={loading}>
+              <AnimatedPressable style={[s.sendBtn, loading && { opacity: 0.8 }]} onPress={handleSubmit} disabled={loading}>
                 {loading
-                  ? <ActivityIndicator color="#fff" size="small" />
+                  ? <><Animated.Image source={require('../assets/images/icon.png')} style={{ width: 16, height: 16, borderRadius: 4, transform: [{ rotate: spin }] }} /><Text style={s.sendTxt}> Orchestrating...</Text></>
                   : <><Ionicons name="send" size={15} color="#fff" /><Text style={s.sendTxt}> Send Request</Text></>
                 }
               </AnimatedPressable>
@@ -150,6 +152,7 @@ export default function HomeScreen({ onNext, onTabChange, activeTab = 'HOME' }: 
                 title="BOOKING AGENT"
                 desc="Ready to dispatch final job details to the selected technician."
                 status={step >= 4 ? 'done' : 'waiting'}
+                isLast={true}
               />
             </GlassCard>
           </ScrollView>
@@ -185,10 +188,10 @@ const s = StyleSheet.create({
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   logoMark: { width: 36, height: 36, borderRadius: 10, backgroundColor: C.blueGlow, borderWidth: 1.5, borderColor: C.blue + '33', alignItems: 'center', justifyContent: 'center' },
   logoK: { color: C.blue, fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 18 },
-  brand: { color: C.text, fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 16 },
+  brand: { color: C.text, fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 18, marginLeft: 10 },
   brandSub: { color: C.textMuted, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 10 },
-  agentsBadge: { borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5, borderWidth: 1, borderColor: C.green, backgroundColor: C.greenGlow },
-  agentsText: { color: '#065F46', fontSize: 10, fontFamily: 'PlusJakartaSans_700Bold' },
+  agentsBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: C.blue, backgroundColor: C.blueGlow },
+  agentsText: { color: C.blue, fontSize: 11, fontFamily: 'PlusJakartaSans_600SemiBold' },
   heading: { fontSize: 24, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.text, marginBottom: 4 },
   subheading: { fontSize: 13, fontFamily: 'PlusJakartaSans_400Regular', color: C.textMuted, marginBottom: 16 },
   input: { color: C.text, fontSize: 15, fontFamily: 'PlusJakartaSans_500Medium', minHeight: 80, textAlignVertical: 'top', lineHeight: 24 },

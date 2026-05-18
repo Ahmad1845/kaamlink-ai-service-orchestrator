@@ -48,7 +48,7 @@ export default function ConfirmedScreen({ data, onRestart, onSimulateCancel }: {
         <Animated.ScrollView style={{ opacity: fadeAnim }} contentContainerStyle={{ padding: 16, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
 
           {/* Confirmation Hero */}
-          <GlassCard style={{ alignItems: 'center', paddingVertical: 24, borderColor: C.green + '44', borderWidth: 1.5 }}>
+          <GlassCard style={{ alignItems: 'center', paddingVertical: 24, borderColor: C.blue, borderWidth: 1.5 }}>
             <View style={s.checkCircle}>
               <Ionicons name="checkmark-circle" size={52} color={C.green} />
             </View>

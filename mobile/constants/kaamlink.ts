@@ -10,8 +10,8 @@ export const C = {
   border:     '#E2E8F0',
 
   // Brand Colors
-  blue:       '#3B82F6',
-  blueGlow:   '#EFF6FF',
+  blue:       '#3D5AFE',
+  blueGlow:   '#EEF1FF',
   blueDark:   '#1D4ED8',
   purple:     '#8B5CF6',
   purpleGlow: '#F5F3FF',

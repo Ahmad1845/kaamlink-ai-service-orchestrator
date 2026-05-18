@@ -34,24 +34,32 @@ export function SectionHeader({ icon, label }: { icon: string; label: string }) 
 }
 
 // ── Avatar ────────────────────────────────────────────────────────────────────
-export function Avatar({ name, color, size = 44 }: { name: string; color: string; size?: number }) {
+export function Avatar({ name, size = 44 }: { name: string; color?: string; size?: number }) {
   const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
   return (
-    <View style={[s.avatar, { width: size, height: size, borderRadius: size / 2, backgroundColor: color + '18', borderColor: color + '33' }]}>
-      <Text style={[s.avatarTxt, { color, fontSize: size * 0.36 }]}>{initials}</Text>
+    <View style={[s.avatar, { width: size, height: size, borderRadius: size / 2, backgroundColor: C.blueGlow, borderColor: C.blue }]}>
+      <Text style={[s.avatarTxt, { color: C.blue, fontSize: size * 0.36 }]}>{initials}</Text>
     </View>
   );
 }
 
 // ── Agent Step Row ─────────────────────────────────────────────────────────────
-export function AgentStepRow({ title, desc, status }: { title: string; desc: string; status: 'done' | 'running' | 'waiting' }) {
-  const dotColor = status === 'done' ? C.green : status === 'running' ? C.blue : C.border;
-  const txtColor = status === 'waiting' ? C.textMuted : C.text;
+export function AgentStepRow({ title, desc, status, isLast }: { title: string; desc: string; status: 'done' | 'running' | 'waiting', isLast?: boolean }) {
+  const isWaiting = status === 'waiting';
+  const dotColor = status === 'done' ? C.green : status === 'running' ? C.blue : 'transparent';
+  const borderColor = isWaiting ? C.textMuted : 'transparent';
+  const txtColor = isWaiting ? C.textMuted : C.text;
+  
   return (
     <View style={s.stepRow}>
-      <View style={[s.stepDot, { backgroundColor: dotColor }]}>
-        {status === 'done' && <Ionicons name="checkmark" size={10} color="#fff" />}
-        {status === 'running' && <PulsingDot color="#fff" size={6} />}
+      {/* Vertical connecting line */}
+      {!isLast && (
+        <View style={{ position: 'absolute', left: 10, top: 24, bottom: -12, width: 2, backgroundColor: C.blue, opacity: isWaiting ? 0.3 : 1 }} />
+      )}
+      
+      <View style={[s.stepDot, { backgroundColor: dotColor, borderWidth: isWaiting ? 1.5 : 0, borderColor }]}>
+        {status === 'done' && <Ionicons name="checkmark" size={12} color="#fff" />}
+        {status === 'running' && <PulsingDot color="#fff" size={8} />}
       </View>
       <View style={{ flex: 1 }}>
         <Text style={[s.stepTitle, { color: txtColor, fontFamily: 'JetBrainsMono_400Regular' }]}>{title}</Text>

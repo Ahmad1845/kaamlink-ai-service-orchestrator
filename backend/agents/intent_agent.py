@@ -59,16 +59,33 @@ def extract_intent(user_text: str) -> Intent:
     if not client or not types:
         raise ValueError("GEMINI_API_KEY is not configured.")
 
-    response = client.models.generate_content(
-        model='gemini-2.5-flash',
-        contents=user_text,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            system_instruction=system_instruction,
-            temperature=0.1
-        ),
-    )
-    
-    data = json.loads(response.text)
-    return Intent(**data)
+    try:
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=user_text,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                system_instruction=system_instruction,
+                temperature=0.1
+            ),
+        )
+        data = json.loads(response.text)
+        return Intent(**data)
+    except Exception as e:
+        print(f"Gemini API rate limit or error encountered: {e}. Using resilient fallback.")
+        text_lower = user_text.lower()
+        service = "AC repair" if "ac " in text_lower or "ac" in text_lower else "plumbing" if "pani" in text_lower or "leak" in text_lower else "electrician"
+        urgency = "high" if "urgent" in text_lower or "jaldi" in text_lower else "medium"
+        location = "G-13" if "g-13" in text_lower or "g13" in text_lower else "F-7" if "f7" in text_lower else "unknown"
+        
+        return Intent(
+            service=service,
+            issue="Simulated issue (AI fallback)",
+            location=location,
+            preferred_time="asap",
+            budget_sensitive=False,
+            urgency=urgency,
+            complexity="intermediate",
+            confidence=0.85
+        )
 

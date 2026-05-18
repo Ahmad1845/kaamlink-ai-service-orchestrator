@@ -82,6 +82,7 @@ export default function BidsScreen({ data, onNext, onBack }: { data: any; onNext
               title="BID SIMULATION AGENT"
               desc={shown >= 3 ? 'All bids ranked · Best Value identified' : `Waiting for bids... (${shown}/3)`}
               status={shown >= 3 ? 'done' : shown > 0 ? 'running' : 'waiting'}
+              isLast={true}
             />
           </GlassCard>
 
