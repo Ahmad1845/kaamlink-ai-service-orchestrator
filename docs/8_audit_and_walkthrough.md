@@ -122,3 +122,7 @@ mobile/
 | Ranking Agent step 3 never showing "running" | Added `setAgentStep(3)` + 800ms delay before step 4 |
 | Metro out-of-memory crash | Fixed with `NODE_OPTIONS=--max-old-space-size=4096` |
 | Phase 2 screens in App.js (wrong entry point) | Rewrote as modular screen files, index.tsx is clean orchestrator |
+| Input placeholder string populated as actual text | Reset initial state to empty string and set proper `placeholder` |
+| Trace console appearing without animation block | Replaced styling logic with explicit shrinking Spacer and `LayoutAnimation.spring` config |
+| Account profile showing "Jobs Done" (Provider UI) | Changed labels to Consumer metrics: "Total Bookings" and "Kaam Points" |
+| Backend API hardcoded to localhost / LAN IP | Updated `API_BASE` to Production Railway URL for final EAS APK Build |
