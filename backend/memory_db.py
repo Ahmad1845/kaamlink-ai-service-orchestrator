@@ -298,36 +298,38 @@ providers_memory = [
         "location": "G-9",
         "distance_km": 3.5
     },
-    # ── Towing ────────────────────────────────────────────────────────────────
+    # ── Geyser Technician ──────────────────────────────────────────────────────
     {
-        "id": "prov_tow_1",
-        "name": "Rescue Towing ISB",
-        "services": ["towing", "vehicle recovery", "roadside assistance", "breakdown service"],
+        "id": "prov_geyser_1",
+        "name": "Hot Water Solutions",
+        "services": ["geyser repair", "water heater", "gas geyser installation", "electric geyser repair"],
         "rating": 4.7,
         "cancellation_rate": 0.04,
-        "base_price": 1500,
+        "base_price": 1200,
         "location": "G-13",
-        "distance_km": 2.0
+        "distance_km": 1.5
     },
+    # ── Gardener ───────────────────────────────────────────────────────────────
     {
-        "id": "prov_tow_2",
-        "name": "Swift Tow Trucks",
-        "services": ["towing", "flatbed towing", "breakdown"],
+        "id": "prov_garden_1",
+        "name": "Green Thumb Landscaping",
+        "services": ["gardening", "lawn mowing", "plant care", "tree trimming"],
         "rating": 4.6,
-        "cancellation_rate": 0.06,
-        "base_price": 1600,
-        "location": "I-8",
-        "distance_km": 3.1
+        "cancellation_rate": 0.05,
+        "base_price": 1500,
+        "location": "F-8",
+        "distance_km": 2.2
     },
+    # ── Security ───────────────────────────────────────────────────────────────
     {
-        "id": "prov_tow_3",
-        "name": "24/7 Road Rescue",
-        "services": ["towing", "jump start", "vehicle recovery"],
-        "rating": 4.5,
-        "cancellation_rate": 0.08,
-        "base_price": 1400,
-        "location": "H-13",
-        "distance_km": 4.5
+        "id": "prov_security_1",
+        "name": "SafeHome CCTV & Guards",
+        "services": ["security", "cctv installation", "security guard", "camera repair"],
+        "rating": 4.9,
+        "cancellation_rate": 0.02,
+        "base_price": 2500,
+        "location": "I-8",
+        "distance_km": 3.0
     },
 ]
 

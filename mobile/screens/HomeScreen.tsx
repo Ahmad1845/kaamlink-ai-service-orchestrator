@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, ScrollView, ActivityIndicator, StyleSheet, SafeAreaView, Animated, Platform, UIManager, Image } from 'react-native';
+import { View, Text, TextInput, ScrollView, ActivityIndicator, StyleSheet, SafeAreaView, Animated, Platform, UIManager, Image, LayoutAnimation } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { C, API_BASE, REASONINGS } from '../constants/kaamlink';
@@ -12,8 +12,15 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 // Generate a fake but realistic session ID
 const SESSION_ID = `REQ-${Math.floor(1000 + Math.random() * 9000)}-${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${Math.floor(1 + Math.random() * 9)}`;
 
+const SMOOTH_ANIM = {
+  duration: 1200,
+  create: { type: LayoutAnimation.Types.easeInEaseOut, property: LayoutAnimation.Properties.opacity },
+  update: { type: LayoutAnimation.Types.spring, springDamping: 0.75 },
+  delete: { type: LayoutAnimation.Types.easeInEaseOut, property: LayoutAnimation.Properties.opacity },
+};
+
 export default function HomeScreen({ onNext, onTabChange, activeTab = 'HOME' }: { onNext: (data: any) => void; onTabChange?: (tab: string) => void; activeTab?: string }) {
-  const [text, setText] = useState('AC bilkul thanda nahi kar raha, G-13 mein urgent chahiye');
+  const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
   const [intent, setIntent] = useState<any>(null);
   const [step, setStep] = useState(0);
@@ -30,23 +37,31 @@ export default function HomeScreen({ onNext, onTabChange, activeTab = 'HOME' }: 
   const handleSubmit = async () => {
     if (!text.trim() || loading) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setLoading(true); setIntent(null); setStep(1);
+    setLoading(true); setIntent(null);
+    LayoutAnimation.configureNext(SMOOTH_ANIM);
+    setStep(1);
     try {
       const r1 = await fetch(`${API_BASE}/api/request`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
       const intentData = await r1.json();
       if (!r1.ok) throw new Error(typeof intentData.detail === 'string' ? intentData.detail : JSON.stringify(intentData.detail) || 'Intent API Failed');
-      
-      if (intentData.service === 'invalid') { alert('Please describe a home service need.'); setStep(0); setLoading(false); return; }
+
+      if (intentData.service === 'invalid') {
+        alert('Please describe a home service need.');
+        LayoutAnimation.configureNext(SMOOTH_ANIM);
+        setStep(0);
+        setLoading(false);
+        return;
+      }
       setIntent(intentData); setStep(2);
-      
+
       const r2 = await fetch(`${API_BASE}/api/providers`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(intentData) });
       const rawProviders = await r2.json();
       if (!r2.ok) throw new Error(typeof rawProviders.detail === 'string' ? rawProviders.detail : JSON.stringify(rawProviders.detail) || 'Providers API Failed');
-      
+
       setStep(3); await new Promise(r => setTimeout(r, 700)); setStep(4);
       const providers = rawProviders.map((p: any, i: number) => {
         const d = Number(p.distance_km) || ((i + 1) * 0.9);
-        
+
         // Generate dynamic AI insight based on the actual service requested
         const srv = intentData.service.toLowerCase();
         let dynamicReasoning = '';
@@ -66,7 +81,11 @@ export default function HomeScreen({ onNext, onTabChange, activeTab = 'HOME' }: 
         };
       });
       onNext({ intent: intentData, providers });
-    } catch (e: any) { alert('Failed: ' + e.message); setStep(0); }
+    } catch (e: any) {
+      alert('Failed: ' + e.message);
+      LayoutAnimation.configureNext(SMOOTH_ANIM);
+      setStep(0);
+    }
     setLoading(false);
   };
 
@@ -76,8 +95,8 @@ export default function HomeScreen({ onNext, onTabChange, activeTab = 'HOME' }: 
   const urgencyStyle = intent?.urgency === 'high'
     ? { bg: C.amberGlow, border: C.amber, text: C.amberDark }
     : intent?.urgency === 'medium'
-    ? { bg: '#FFF7ED', border: '#FDBA74', text: '#C2410C' }
-    : { bg: C.greenGlow, border: C.green, text: '#065F46' };
+      ? { bg: '#FFF7ED', border: '#FDBA74', text: '#C2410C' }
+      : { bg: C.greenGlow, border: C.green, text: '#065F46' };
 
   return (
     <View style={s.root}>
@@ -97,6 +116,7 @@ export default function HomeScreen({ onNext, onTabChange, activeTab = 'HOME' }: 
           </View>
 
           <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+            {step === 0 && <View style={{ height: 160 }} />}
             <Text style={s.heading}>What do you need done?</Text>
             <Text style={s.subheading}>Roman Urdu, Urdu, or English — we understand all</Text>
 
@@ -107,13 +127,13 @@ export default function HomeScreen({ onNext, onTabChange, activeTab = 'HOME' }: 
                 value={text}
                 onChangeText={setText}
                 multiline
-                placeholder="e.g. AC thanda nahi kar raha, G-13 mein urgent..."
+                placeholder="e.g. AC bilkul thanda nahi kar raha, G-13 mein urgent chahiye"
                 placeholderTextColor={C.textMuted}
               />
               <AnimatedPressable style={[s.sendBtn, loading && { opacity: 0.8 }]} onPress={handleSubmit} disabled={loading}>
                 {loading
-                  ? <><Animated.Image source={require('../assets/images/icon.png')} style={{ width: 16, height: 16, borderRadius: 4, transform: [{ rotate: spin }] }} /><Text style={s.sendTxt}> Orchestrating...</Text></>
-                  : <><Ionicons name="send" size={15} color="#fff" /><Text style={s.sendTxt}> Send Request</Text></>
+                  ? <Animated.Image source={require('../assets/images/icon.png')} style={{ width: 18, height: 18, borderRadius: 4, transform: [{ rotate: spin }] }} />
+                  : <Ionicons name="send" size={18} color="#fff" style={{ marginLeft: 2 }} />
                 }
               </AnimatedPressable>
             </GlassCard>
@@ -140,63 +160,65 @@ export default function HomeScreen({ onNext, onTabChange, activeTab = 'HOME' }: 
             )}
 
             {/* Agent Trace Console */}
-            <GlassCard>
-              <View style={s.traceHeaderRow}>
-                <SectionHeader icon="server-outline" label="Agent Trace Console" />
-                <Text style={s.sessionId}>{SESSION_ID}</Text>
-              </View>
-              {/* Step 1: Intent → fires when user submits */}
-              <AgentStepRow
-                title="INTENT AGENT"
-                desc={intent ? `Extracted ${intent.service} · ${intent.location} · ${intent.urgency} urgency` : 'Awaiting input...'}
-                status={getStep(1)}
-              />
-              {/* Step 2: Radius + Discovery → fire during provider search */}
-              <AgentStepRow
-                title="RADIUS AGENT"
-                desc={step > 2 ? 'Providers found within target radius' : step === 2 ? 'Expanding search radius to find providers...' : 'Will geo-fence provider search by location radius.'}
-                status={getStep(2)}
-              />
-              <AgentStepRow
-                title="DISCOVERY AGENT"
-                desc={step > 2 ? 'Providers scanned · top matches identified' : step === 2 ? 'Scanning available providers in target sector...' : 'Pending'}
-                status={getStep(2)}
-              />
-              {/* Step 3: Ranking → fires after providers found */}
-              <AgentStepRow
-                title="RANKING AGENT"
-                desc={step > 3 ? 'Best value identified · ranked by proximity · rating · reliability' : step === 3 ? 'Ranking candidates by score...' : 'Awaiting provider list to rank.'}
-                status={getStep(3)}
-              />
-              {/* Steps 5-8: activate on later screens — shown as waiting here */}
-              <AgentStepRow
-                title="PRICING AGENT"
-                desc="Will compute market-fair pricing based on service, urgency, and location."
-                status="waiting"
-              />
-              <AgentStepRow
-                title="SCHEDULING AGENT"
-                desc="Will validate and assign optimal time slot for dispatch."
-                status="waiting"
-              />
-              <AgentStepRow
-                title="BOOKING AGENT"
-                desc="Ready to confirm job and dispatch provider details."
-                status="waiting"
-              />
-              <AgentStepRow
-                title="NOTIFICATION AGENT"
-                desc="Standby for in-app, SMS, and WhatsApp alerts in Roman Urdu."
-                status="waiting"
-              />
-              {/* Recovery always on standby */}
-              <AgentStepRow
-                title="RECOVERY AGENT"
-                desc="Standby — monitoring booking health"
-                status="waiting"
-                isLast={true}
-              />
-            </GlassCard>
+            {step > 0 && (
+              <GlassCard>
+                <View style={s.traceHeaderRow}>
+                  <SectionHeader icon="server-outline" label="Agent Trace Console" />
+                  <Text style={s.sessionId}>{SESSION_ID}</Text>
+                </View>
+                {/* Step 1: Intent → fires when user submits */}
+                <AgentStepRow
+                  title="INTENT AGENT"
+                  desc={intent ? `Extracted ${intent.service} · ${intent.location} · ${intent.urgency} urgency` : 'Awaiting input...'}
+                  status={getStep(1)}
+                />
+                {/* Step 2: Radius + Discovery → fire during provider search */}
+                <AgentStepRow
+                  title="RADIUS AGENT"
+                  desc={step > 2 ? 'Providers found within target radius' : step === 2 ? 'Expanding search radius to find providers...' : 'Will geo-fence provider search by location radius.'}
+                  status={getStep(2)}
+                />
+                <AgentStepRow
+                  title="DISCOVERY AGENT"
+                  desc={step > 2 ? 'Providers scanned · top matches identified' : step === 2 ? 'Scanning available providers in target sector...' : 'Pending'}
+                  status={getStep(2)}
+                />
+                {/* Step 3: Ranking → fires after providers found */}
+                <AgentStepRow
+                  title="RANKING AGENT"
+                  desc={step > 3 ? 'Best value identified · ranked by proximity · rating · reliability' : step === 3 ? 'Ranking candidates by score...' : 'Awaiting provider list to rank.'}
+                  status={getStep(3)}
+                />
+                {/* Steps 5-8: activate on later screens — shown as waiting here */}
+                <AgentStepRow
+                  title="PRICING AGENT"
+                  desc="Will compute market-fair pricing based on service, urgency, and location."
+                  status="waiting"
+                />
+                <AgentStepRow
+                  title="SCHEDULING AGENT"
+                  desc="Will validate and assign optimal time slot for dispatch."
+                  status="waiting"
+                />
+                <AgentStepRow
+                  title="BOOKING AGENT"
+                  desc="Ready to confirm job and dispatch provider details."
+                  status="waiting"
+                />
+                <AgentStepRow
+                  title="NOTIFICATION AGENT"
+                  desc="Standby for in-app, SMS, and WhatsApp alerts in Roman Urdu."
+                  status="waiting"
+                />
+                {/* Recovery always on standby */}
+                <AgentStepRow
+                  title="RECOVERY AGENT"
+                  desc="Standby — monitoring booking health"
+                  status="waiting"
+                  isLast={true}
+                />
+              </GlassCard>
+            )}
           </ScrollView>
 
           {/* Tab Bar */}
@@ -237,7 +259,7 @@ const s = StyleSheet.create({
   heading: { fontSize: 24, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.text, marginBottom: 4 },
   subheading: { fontSize: 13, fontFamily: 'PlusJakartaSans_400Regular', color: C.textMuted, marginBottom: 16 },
   input: { color: C.text, fontSize: 15, fontFamily: 'PlusJakartaSans_500Medium', minHeight: 80, textAlignVertical: 'top', lineHeight: 24 },
-  sendBtn: { position: 'absolute', right: 12, bottom: 12, flexDirection: 'row', alignItems: 'center', backgroundColor: C.blue, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10 },
+  sendBtn: { position: 'absolute', right: 12, bottom: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: C.blue, borderRadius: 24, width: 44, height: 44 },
   sendTxt: { color: '#fff', fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13 },
   intentDesc: { fontSize: 12, color: C.textMuted, fontFamily: 'PlusJakartaSans_400Regular', marginBottom: 12, lineHeight: 18 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

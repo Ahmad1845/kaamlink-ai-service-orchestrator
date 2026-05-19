@@ -12,8 +12,9 @@ import ConfirmedScreen from '../../screens/ConfirmedScreen';
 import RecoveryScreen from '../../screens/RecoveryScreen';
 import ServicesScreen from '../../screens/ServicesScreen';
 import RequestsScreen from '../../screens/RequestsScreen';
+import AccountScreen from '../../screens/AccountScreen';
 
-type Screen = 'home' | 'pricing' | 'bids' | 'confirmed' | 'recovery' | 'SERVICES' | 'REQUESTS';
+type Screen = 'home' | 'pricing' | 'bids' | 'confirmed' | 'recovery' | 'SERVICES' | 'REQUESTS' | 'ACCOUNT';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home');
@@ -34,6 +35,7 @@ export default function App() {
     if (tab === 'HOME') setScreen('home');
     if (tab === 'SERVICES') setScreen('SERVICES');
     if (tab === 'REQUESTS') setScreen('REQUESTS');
+    if (tab === 'ACCOUNT') setScreen('ACCOUNT');
   };
 
   const restart = () => { setFlowData({}); setScreen('home'); };
@@ -66,6 +68,8 @@ export default function App() {
     return <ServicesScreen onTabChange={handleTabChange} activeTab="SERVICES" />;
   if (screen === 'REQUESTS')
     return <RequestsScreen bookingData={flowData} onTabChange={handleTabChange} activeTab="REQUESTS" />;
+  if (screen === 'ACCOUNT')
+    return <AccountScreen onTabChange={handleTabChange} activeTab="ACCOUNT" />;
 
   return null;
 }

@@ -73,9 +73,17 @@ SERVICE_CATEGORIES = {
         "car wash", "car cleaning", "auto detailing",
         "interior cleaning", "exterior wash"
     ],
-    "Towing": [
-        "towing", "car towing", "breakdown service",
-        "roadside assistance", "vehicle recovery"
+    "Geyser Technician": [
+        "geyser repair", "water heater repair", "geyser installation",
+        "gas geyser", "electric geyser"
+    ],
+    "Gardener": [
+        "gardening", "lawn mowing", "plant care",
+        "landscaping", "tree trimming"
+    ],
+    "Security": [
+        "security", "security guard", "cctv installation",
+        "camera repair", "home security"
     ],
 }
 
@@ -90,7 +98,9 @@ PRICE_BANDS = {
     "Painter":        (1500, 4000),
     "Pest Control":   (2500, 6000),
     "Car Wash":       (500,  2500),
-    "Towing":         (2000, 8000),
+    "Geyser Technician": (800, 2500),
+    "Gardener":       (1000, 3000),
+    "Security":       (2000, 5000),
 }
 
 
