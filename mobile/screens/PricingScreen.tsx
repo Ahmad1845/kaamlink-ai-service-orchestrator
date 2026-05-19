@@ -35,6 +35,7 @@ export default function PricingScreen({ data, onNext, onBack }: { data: any; onN
   const probColor = prob !== null ? (prob >= 75 ? C.green : prob >= 50 ? C.amber : C.red) : C.blue;
   const barWidth = barAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] });
   const accepted = budget ? parseInt(budget) : pricing?.suggested_offer;
+  const isBelowMin = budget && pricing && parseInt(budget) < pricing.market_min;
 
   const urgencyBg = intent.urgency === 'high' ? C.amberGlow : C.greenGlow;
   const urgencyBorder = intent.urgency === 'high' ? C.amber : C.green;
@@ -99,7 +100,14 @@ export default function PricingScreen({ data, onNext, onBack }: { data: any; onN
                   placeholder={`Suggested: ${pricing.suggested_offer}`}
                   placeholderTextColor={C.textMuted}
                 />
-                {prob !== null && (
+                {isBelowMin ? (
+                  <View style={{ marginTop: 12, flexDirection: 'row', alignItems: 'center', backgroundColor: C.red + '22', padding: 10, borderRadius: 8 }}>
+                    <Ionicons name="warning" size={14} color={C.red} />
+                    <Text style={{ marginLeft: 6, color: C.red, fontSize: 12, fontFamily: 'PlusJakartaSans_600SemiBold' }}>
+                      Price cannot be below market minimum (Rs. {pricing.market_min.toLocaleString()})
+                    </Text>
+                  </View>
+                ) : prob !== null && (
                   <View style={{ marginTop: 12 }}>
                     <View style={s.probTrack}>
                       <Animated.View style={[s.probFill, { width: barWidth }]}>
@@ -118,8 +126,13 @@ export default function PricingScreen({ data, onNext, onBack }: { data: any; onN
           )}
 
           <AnimatedPressable
-            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onNext({ ...data, pricing, userBudget: accepted }); }}
-            style={s.btn}
+            onPress={() => { 
+              if (isBelowMin) return;
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); 
+              onNext({ ...data, pricing, userBudget: accepted }); 
+            }}
+            style={[s.btn, isBelowMin && { opacity: 0.5, backgroundColor: C.textMuted }]}
+            disabled={!!isBelowMin}
           >
             <Text style={s.btnTxt}>{accepted ? `Accept Rs. ${accepted.toLocaleString()} →` : 'Continue →'}</Text>
           </AnimatedPressable>

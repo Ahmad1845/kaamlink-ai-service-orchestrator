@@ -125,20 +125,20 @@ def discover_providers(intent: Intent) -> List[Provider]:
                 
         providers = [Provider(**p) for p in filtered]
         ranked = rank_providers_advanced(providers, intent)
-        top_3 = ranked[:3]
+        top_5 = ranked[:5]
         
         log_agent_action(
             "Discovery Agent",
-            f"Ranking top {len(top_3)} candidates.",
+            f"Ranking top {len(top_5)} candidates.",
             (
                 f"Used multi-factor scoring (distance, rating, review recency, reliability, specialization, "
-                f"price fairness, capacity, risk, workload). Winner: {top_3[0].name} "
-                f"(score {top_3[0].ranking_score})."
+                f"price fairness, capacity, risk, workload). Winner: {top_5[0].name} "
+                f"(score {top_5[0].ranking_score})."
             )
         )
         time.sleep(1.0)
         
-        return top_3
+        return top_5
     except Exception as e:
         log_agent_action("Discovery Agent", "Failed to discover providers", str(e))
         raise e

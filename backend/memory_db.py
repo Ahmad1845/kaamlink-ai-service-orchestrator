@@ -112,6 +112,37 @@ providers_memory = [
         "location": "H-13",
         "distance_km": 4.0
     },
+    # ── Appliance Repair ───────────────────────────────────────────────────────
+    {
+        "id": "prov_app_1",
+        "name": "QuickFix Appliances",
+        "services": ["appliance repair", "washing machine", "fridge", "air cooler"],
+        "rating": 4.8,
+        "cancellation_rate": 0.03,
+        "base_price": 1200,
+        "location": "G-13",
+        "distance_km": 1.1
+    },
+    {
+        "id": "prov_app_2",
+        "name": "HomeTech Repair",
+        "services": ["appliance repair", "oven repair", "washing machine", "refrigerator"],
+        "rating": 4.6,
+        "cancellation_rate": 0.05,
+        "base_price": 1500,
+        "location": "F-8",
+        "distance_km": 2.7
+    },
+    {
+        "id": "prov_app_3",
+        "name": "Islamabad Appliance Masters",
+        "services": ["appliance repair", "fridge", "freezer", "machine"],
+        "rating": 4.4,
+        "cancellation_rate": 0.08,
+        "base_price": 1000,
+        "location": "I-10",
+        "distance_km": 3.8
+    },
     # ── Home Cleaning ──────────────────────────────────────────────────────────
     {
         "id": "prov_clean_1",

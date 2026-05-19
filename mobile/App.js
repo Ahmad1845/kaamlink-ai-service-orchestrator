@@ -19,7 +19,7 @@ function AgentTrace({ logs }) {
   return (
     <View style={s.traceBox}>
       <Text style={s.traceTitle}>🤖 Agent Trace</Text>
-      {logs.slice(0, 6).map((l, i) => (
+      {logs.slice(0, 9).map((l, i) => (
         <View key={i} style={s.traceRow}>
           <Text style={s.traceDot}>▸</Text>
           <View style={{ flex: 1 }}>
@@ -93,7 +93,7 @@ function HomeScreen({ onNext }) {
       <View style={s.header}>
         <Text style={s.logo}>⚡ Kaamlink</Text>
         <Text style={s.logoSub}>AI Service Orchestrator</Text>
-        <View style={s.badge}><Text style={s.badgeText}>Phase 2 • 7 Agents</Text></View>
+        <View style={s.badge}><Text style={s.badgeText}>Phase 2 • 9 Agents</Text></View>
       </View>
       <View style={s.card}>
         <Text style={s.label}>Apna masla batayein</Text>

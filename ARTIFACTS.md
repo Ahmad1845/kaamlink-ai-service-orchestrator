@@ -16,6 +16,10 @@ This file lists every artifact produced during the design, development, and iter
 | [`docs/6_implementation_plan.md`](docs/6_implementation_plan.md) | Phase 2 agent additions and UI expansion |
 | [`docs/7_phase2_implementation_plan.md`](docs/7_phase2_implementation_plan.md) | Full Phase 2 build plan (3 new agents + 5 screens) |
 | [`docs/8_audit_and_walkthrough.md`](docs/8_audit_and_walkthrough.md) | Codebase audit, bug fixes, and final architecture walkthrough |
+| [`docs/9_ui_polish_implementation_plan.md`](docs/9_ui_polish_implementation_plan.md) | High-fidelity mobile UI polish and design overhaul plan |
+| [`docs/10_ui_polish_tasks.md`](docs/10_ui_polish_tasks.md) | Task tracking for UI aesthetic and trace updates |
+| [`docs/11_ui_polish_walkthrough.md`](docs/11_ui_polish_walkthrough.md) | Walkthrough of the finalized 9-agent trace panel and styling |
+| [`docs/12_final_orchestration_polish_walkthrough.md`](docs/12_final_orchestration_polish_walkthrough.md) | Final hackathon capstone: Interactive ratings, dynamic bids, AI guardrails |
 
 ---
 

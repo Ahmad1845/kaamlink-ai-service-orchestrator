@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Animated } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Animated, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -18,6 +18,9 @@ export default function ConfirmedScreen({ data, onRestart, onSimulateCancel }: {
   const { intent, selectedBid, pricing, userBudget } = data;
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [tlStep, setTlStep] = useState(1);
+  const [rating, setRating] = useState<number | null>(null);
+  const [reviewText, setReviewText] = useState('');
+  const [ratingSubmitted, setRatingSubmitted] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -113,7 +116,13 @@ export default function ConfirmedScreen({ data, onRestart, onSimulateCancel }: {
 
           {/* Timeline */}
           <GlassCard>
-            <Text style={s.sectionTitle}>Service Timeline</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <Text style={[s.sectionTitle, { marginBottom: 0 }]}>Service Timeline</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: C.blueGlow, borderRadius: 20, paddingHorizontal: 9, paddingVertical: 3, borderWidth: 1, borderColor: C.blue + '44' }}>
+                <Ionicons name="notifications-outline" size={11} color={C.blue} />
+                <Text style={{ fontSize: 10, fontFamily: 'PlusJakartaSans_600SemiBold', color: C.blue }}>Notification Agent</Text>
+              </View>
+            </View>
             {TIMELINE.map((item, i) => {
               const done = i < tlStep;
               const active = i === tlStep - 1;
@@ -137,30 +146,104 @@ export default function ConfirmedScreen({ data, onRestart, onSimulateCancel }: {
           </GlassCard>
 
           {/* Agent row */}
-          <GlassCard>
-            <AgentStepRow
-              title="BOOKING AGENT"
-              desc={`Booking ${bookingId?.slice(0, 8) || '...'} confirmed and logged`}
-              status={bookingId ? 'done' : 'running'}
-            />
-          </GlassCard>
-
-          {tlStep >= TIMELINE.length ? (
-            <GlassCard style={{ borderColor: C.amber + '66', backgroundColor: C.amberGlow, paddingVertical: 20, alignItems: 'center', marginBottom: 10 }}>
-              <Text style={{ fontSize: 18, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.amberDark, marginBottom: 8 }}>
-                Rate {selectedBid.provider_name.split(' ')[0]} ⭐
-              </Text>
-              <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
-                {[1, 2, 3, 4, 5].map(n => <Ionicons key={n} name="star" size={32} color={C.amber} />)}
-              </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20 }}>
-                <Ionicons name="shield-checkmark" size={16} color={C.green} />
-                <Text style={{ fontSize: 13, fontFamily: 'PlusJakartaSans_600SemiBold', color: C.green, marginLeft: 6 }}>
-                  Service warranty valid for 30 days
-                </Text>
-              </View>
+            <GlassCard>
+              <AgentStepRow
+                title="BOOKING AGENT"
+                desc={`Booking ${bookingId?.slice(0, 8).toUpperCase() || '...'} confirmed and logged`}
+                status={bookingId ? 'done' : 'running'}
+              />
+              <AgentStepRow
+                title="NOTIFICATION AGENT"
+                desc={tlStep >= TIMELINE.length ? 'All timeline alerts dispatched · Roman Urdu SMS sent' : `Dispatching update ${tlStep} of ${TIMELINE.length} · ${TIMELINE[tlStep - 1]?.label}`}
+                status={tlStep >= TIMELINE.length ? 'done' : 'running'}
+              />
+              {tlStep >= TIMELINE.length && (
+                <AgentStepRow
+                  title="QUALITY AGENT"
+                  desc={ratingSubmitted ? `Verified checklist · Updated provider reputation based on ${rating}⭐ rating` : 'Awaiting user rating to update provider reputation...'}
+                  status={ratingSubmitted ? 'done' : 'running'}
+                  isLast={true}
+                />
+              )}
             </GlassCard>
-          ) : (
+
+            {tlStep >= TIMELINE.length ? (
+              <GlassCard style={{ borderColor: C.amber + '66', backgroundColor: C.amberGlow, paddingVertical: 20, alignItems: 'center', marginBottom: 10 }}>
+                {ratingSubmitted ? (
+                  <>
+                    <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: C.amber, alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                      <Ionicons name="checkmark" size={28} color="#fff" />
+                    </View>
+                    <Text style={{ fontSize: 18, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.amberDark, marginBottom: 4 }}>
+                      Thanks for rating!
+                    </Text>
+                    <Text style={{ fontSize: 13, fontFamily: 'PlusJakartaSans_500Medium', color: C.amberDark, marginBottom: 16 }}>
+                      Quality Agent has updated their profile.
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={{ fontSize: 18, fontFamily: 'PlusJakartaSans_800ExtraBold', color: C.amberDark, marginBottom: 8 }}>
+                      Rate {selectedBid.provider_name.split(' ')[0]}
+                    </Text>
+                    <View style={{ flexDirection: 'row', gap: 8, marginBottom: rating ? 12 : 16 }}>
+                      {[1, 2, 3, 4, 5].map(n => (
+                        <TouchableOpacity 
+                          key={n} 
+                          onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                            setRating(n);
+                          }}
+                        >
+                          <Ionicons name={rating && n <= rating ? "star" : "star-outline"} size={36} color={C.amber} />
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                    
+                    {rating && (
+                      <View style={{ width: '100%', marginBottom: 16 }}>
+                        <TextInput
+                          style={{ backgroundColor: '#fff', borderRadius: 12, padding: 12, fontSize: 14, fontFamily: 'PlusJakartaSans_500Medium', borderWidth: 1, borderColor: C.border, color: C.text, minHeight: 80, textAlignVertical: 'top' }}
+                          placeholder="Write a review (optional)..."
+                          placeholderTextColor={C.textMuted}
+                          multiline
+                          value={reviewText}
+                          onChangeText={setReviewText}
+                        />
+                        <AnimatedPressable
+                          style={{ backgroundColor: C.amber, borderRadius: 12, padding: 14, alignItems: 'center', marginTop: 12 }}
+                          onPress={async () => {
+                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                            setRatingSubmitted(true);
+                            try {
+                              await fetch(`${API_BASE}/api/service/complete`, {
+                                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  booking_id: bookingId || 'local-' + Date.now(),
+                                  provider_id: selectedBid.provider_id,
+                                  checklist: { "quality": true, "cleanliness": true },
+                                  evidence_placeholders: ["img1"],
+                                  rating: rating,
+                                  review: reviewText || "Great service!"
+                                }),
+                              });
+                            } catch(e) {}
+                          }}
+                        >
+                          <Text style={{ color: '#fff', fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15 }}>Submit Review</Text>
+                        </AnimatedPressable>
+                      </View>
+                    )}
+                  </>
+                )}
+                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20 }}>
+                  <Ionicons name="shield-checkmark" size={16} color={C.green} />
+                  <Text style={{ fontSize: 13, fontFamily: 'PlusJakartaSans_600SemiBold', color: C.green, marginLeft: 6 }}>
+                    Service warranty valid for 30 days
+                  </Text>
+                </View>
+              </GlassCard>
+            ) : (
             <AnimatedPressable style={s.cancelBtn} onPress={() => { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning); onSimulateCancel(bookingId || ''); }}>
               <Ionicons name="warning-outline" size={15} color={C.amber} />
               <Text style={s.cancelTxt}> Simulate Provider Cancellation</Text>

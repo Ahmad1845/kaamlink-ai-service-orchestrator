@@ -80,7 +80,7 @@ export default function HomeScreen({ onNext, onTabChange, activeTab = 'HOME' }: 
             </View>
             <View style={s.agentsBadge}>
               <PulsingDot color={C.blue} size={6} />
-              <Text style={s.agentsText}>7 Agents Active</Text>
+              <Text style={s.agentsText}>9 Agents Active</Text>
             </View>
           </View>
 
@@ -133,25 +133,55 @@ export default function HomeScreen({ onNext, onTabChange, activeTab = 'HOME' }: 
                 <SectionHeader icon="server-outline" label="Agent Trace Console" />
                 <Text style={s.sessionId}>{SESSION_ID}</Text>
               </View>
+              {/* Step 1: Intent → fires when user submits */}
               <AgentStepRow
                 title="INTENT AGENT"
-                desc={intent ? `${intent.service} · ${intent.location} · ${intent.urgency} urgency` : 'Awaiting input...'}
+                desc={intent ? `Extracted ${intent.service} · ${intent.location} · ${intent.urgency} urgency` : 'Awaiting input...'}
                 status={getStep(1)}
               />
+              {/* Step 2: Radius + Discovery → fire during provider search */}
               <AgentStepRow
-                title="DISCOVERY AGENT"
-                desc={step > 2 ? `Matched providers for ${intent?.service}` : step === 2 ? `Scanning 14 available HVAC providers in sector G-13...` : 'Pending'}
+                title="RADIUS AGENT"
+                desc={step > 2 ? 'Providers found within target radius' : step === 2 ? 'Expanding search radius to find providers...' : 'Will geo-fence provider search by location radius.'}
                 status={getStep(2)}
               />
               <AgentStepRow
+                title="DISCOVERY AGENT"
+                desc={step > 2 ? 'Providers scanned · top matches identified' : step === 2 ? 'Scanning available providers in target sector...' : 'Pending'}
+                status={getStep(2)}
+              />
+              {/* Step 3: Ranking → fires after providers found */}
+              <AgentStepRow
                 title="RANKING AGENT"
-                desc={step > 3 ? 'Ranked by proximity · rating · reliability' : 'Awaiting provider list to rank by rating, proximity, and price.'}
+                desc={step > 3 ? 'Best value identified · ranked by proximity · rating · reliability' : step === 3 ? 'Ranking candidates by score...' : 'Awaiting provider list to rank.'}
                 status={getStep(3)}
+              />
+              {/* Steps 5-8: activate on later screens — shown as waiting here */}
+              <AgentStepRow
+                title="PRICING AGENT"
+                desc="Will compute market-fair pricing based on service, urgency, and location."
+                status="waiting"
+              />
+              <AgentStepRow
+                title="SCHEDULING AGENT"
+                desc="Will validate and assign optimal time slot for dispatch."
+                status="waiting"
               />
               <AgentStepRow
                 title="BOOKING AGENT"
-                desc="Ready to dispatch final job details to the selected technician."
-                status={step >= 4 ? 'done' : 'waiting'}
+                desc="Ready to confirm job and dispatch provider details."
+                status="waiting"
+              />
+              <AgentStepRow
+                title="NOTIFICATION AGENT"
+                desc="Standby for in-app, SMS, and WhatsApp alerts in Roman Urdu."
+                status="waiting"
+              />
+              {/* Recovery always on standby */}
+              <AgentStepRow
+                title="RECOVERY AGENT"
+                desc="Standby — monitoring booking health"
+                status="waiting"
                 isLast={true}
               />
             </GlassCard>

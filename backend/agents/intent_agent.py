@@ -23,7 +23,13 @@ def extract_intent(user_text: str) -> Intent:
     Your job is to read natural language service requests (in Roman Urdu or English) and extract the key details.
     
     CRITICAL: You MUST map the service to one of the following exact categories. DO NOT invent new categories:
-    ["AC repair", "plumbing", "electrician", "home cleaning", "carpentry", "painting", "pest control", "car wash", "towing"]
+    ["AC repair", "appliance repair", "plumbing", "electrician", "home cleaning", "carpentry", "painting", "pest control", "car wash", "towing"]
+
+    SERVICE MAPPING RULES (Strictly enforce these):
+    - "washing machine", "fridge", "oven", "air cooler", or other home machines → "appliance repair"
+    - "AC", "air conditioner", "split" → "AC repair"
+    - "car wash", "gari dhoni", "car service" → "car wash"
+    - "bijli", "wiring", "lights", "fan" → "electrician"
 
     LOCATION EXTRACTION RULES (very important):
     - Pakistani sectors are written as letter + number combinations.
@@ -74,7 +80,18 @@ def extract_intent(user_text: str) -> Intent:
     except Exception as e:
         print(f"Gemini API rate limit or error encountered: {e}. Using resilient fallback.")
         text_lower = user_text.lower()
-        service = "AC repair" if "ac " in text_lower or "ac" in text_lower else "plumbing" if "pani" in text_lower or "leak" in text_lower else "electrician"
+        
+        if "car wash" in text_lower or "gari" in text_lower:
+            service = "car wash"
+        elif "washing machine" in text_lower or "fridge" in text_lower or "cooler" in text_lower or "appliance" in text_lower:
+            service = "appliance repair"
+        elif "ac " in text_lower or "ac" in text_lower or "split" in text_lower:
+            service = "AC repair"
+        elif "pani" in text_lower or "leak" in text_lower or "plumb" in text_lower:
+            service = "plumbing"
+        else:
+            service = "electrician"
+
         urgency = "high" if "urgent" in text_lower or "jaldi" in text_lower else "medium"
         location = "G-13" if "g-13" in text_lower or "g13" in text_lower else "F-7" if "f7" in text_lower else "unknown"
         

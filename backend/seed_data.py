@@ -41,6 +41,10 @@ SERVICE_CATEGORIES = {
         "AC repair", "AC cleaning", "cooling issue",
         "compressor repair", "gas filling", "split AC installation"
     ],
+    "Appliance Repair": [
+        "appliance repair", "washing machine repair", "fridge repair",
+        "oven repair", "air cooler repair", "home appliance repair"
+    ],
     "Plumber": [
         "plumbing", "pipe repair", "water motor",
         "sink repair", "leakage", "geyser installation"
@@ -78,6 +82,7 @@ SERVICE_CATEGORIES = {
 # Price bands per category (min, max) in PKR, rounded to nearest 50
 PRICE_BANDS = {
     "AC Technician":  (1000, 3500),
+    "Appliance Repair":(1000, 4000),
     "Plumber":        (800,  3000),
     "Electrician":    (800,  3000),
     "Home Cleaning":  (2500, 6000),

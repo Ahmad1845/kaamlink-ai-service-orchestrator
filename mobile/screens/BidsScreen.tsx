@@ -21,23 +21,24 @@ export default function BidsScreen({ data, onNext, onBack }: { data: any; onNext
   const [bids, setBids] = useState<any[]>([]);
   const [shown, setShown] = useState(0);
   const [secs, setSecs] = useState(120);
-  const slideAnims = useRef([0, 1, 2].map(() => new Animated.Value(40))).current;
-  const fadeAnims = useRef([0, 1, 2].map(() => new Animated.Value(0))).current;
+  const slideAnims = useRef([0, 1, 2, 3, 4].map(() => new Animated.Value(40))).current;
+  const fadeAnims = useRef([0, 1, 2, 3, 4].map(() => new Animated.Value(0))).current;
 
   useEffect(() => {
     fetch(`${API_BASE}/api/bids`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ providers, urgency: intent.urgency, user_budget: userBudget }),
     }).then(r => r.json()).then(d => {
-      setBids(d.bids || []);
-      [0, 1, 2].forEach(i => setTimeout(() => {
+      const newBids = d.bids || [];
+      setBids(newBids);
+      newBids.forEach((_, i) => setTimeout(() => {
         setShown(prev => prev + 1);
         Animated.parallel([
           Animated.spring(slideAnims[i], { toValue: 0, useNativeDriver: true, tension: 80, friction: 12 }),
           Animated.timing(fadeAnims[i], { toValue: 1, duration: 400, useNativeDriver: true }),
         ]).start();
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }, 1400 * (i + 1)));
+      }, 1000 * (i + 1)));
     }).catch(() => {});
   }, []);
 
@@ -80,8 +81,8 @@ export default function BidsScreen({ data, onNext, onBack }: { data: any; onNext
             />
             <AgentStepRow
               title="BID SIMULATION AGENT"
-              desc={shown >= 3 ? 'All bids ranked · Best Value identified' : `Waiting for bids... (${shown}/3)`}
-              status={shown >= 3 ? 'done' : shown > 0 ? 'running' : 'waiting'}
+              desc={shown >= bids.length && bids.length > 0 ? 'All bids ranked · Best Value identified' : `Waiting for bids... (${shown}/${bids.length || '?'})`}
+              status={shown >= bids.length && bids.length > 0 ? 'done' : shown > 0 ? 'running' : 'waiting'}
               isLast={true}
             />
           </GlassCard>
@@ -96,7 +97,7 @@ export default function BidsScreen({ data, onNext, onBack }: { data: any; onNext
           {bids.slice(0, shown).map((bid, i) => {
             const provider = providers?.[i] || {};
             const reasoning = provider.reasoning || '';
-            const isBest = i === 0 && shown >= 3;
+            const isBest = i === 0 && shown >= bids.length && bids.length > 0;
 
             return (
               <Animated.View
