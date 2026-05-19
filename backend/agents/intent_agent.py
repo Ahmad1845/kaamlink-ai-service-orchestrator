@@ -23,13 +23,23 @@ def extract_intent(user_text: str) -> Intent:
     Your job is to read natural language service requests (in Roman Urdu or English) and extract the key details.
     
     CRITICAL: You MUST map the service to one of the following exact categories. DO NOT invent new categories:
-    ["AC repair", "appliance repair", "plumbing", "electrician", "home cleaning", "carpentry", "painting", "pest control", "car wash", "towing"]
+    ["AC repair", "plumbing", "electrician", "carpentry", "geyser repair", "car wash", "painting", "pest control", "home cleaning", "appliance repair", "gardening", "security"]
 
     SERVICE MAPPING RULES (Strictly enforce these):
-    - "washing machine", "fridge", "oven", "air cooler", or other home machines → "appliance repair"
+    - "washing machine", "fridge", "oven", "air cooler" → "appliance repair"
     - "AC", "air conditioner", "split" → "AC repair"
-    - "car wash", "gari dhoni", "car service" → "car wash"
-    - "bijli", "wiring", "lights", "fan" → "electrician"
+    - "car wash", "car washing", "gari dhoni", "car service", "carwash" → "car wash"
+    - "bijli", "wiring", "lights", "fan", "electrician", "electric" → "electrician"
+    - "geyser", "water heater" → "geyser repair"
+    - "plants", "grass", "lawn", "garden", "gardener", "gardening" → "gardening"
+    - "camera", "cctv", "guard", "security" → "security"
+    - "paint", "painter", "painting", "color", "whitewash", "safedi" → "painting"
+    - "bugs", "insects", "termite", "spray", "pest" → "pest control"
+    - "clean", "cleaning", "sweep", "maid", "safai" → "home cleaning"
+    - "wood", "furniture", "door", "lock", "darwaza", "carpenter", "carpentry" → "carpentry"
+    - "pipe", "leak", "motor", "pani", "plumber", "plumbing" → "plumbing"
+
+    CRITICAL: If the user types the service name directly (e.g. "carpenter", "plumber", "car wash", "painter", "gardener"), you MUST map it to the correct category. Do NOT default to "electrician".
 
     LOCATION EXTRACTION RULES (very important):
     - Pakistani sectors are written as letter + number combinations.
@@ -79,18 +89,38 @@ def extract_intent(user_text: str) -> Intent:
         return Intent(**data)
     except Exception as e:
         print(f"Gemini API rate limit or error encountered: {e}. Using resilient fallback.")
+        import re
         text_lower = user_text.lower()
-        
-        if "car wash" in text_lower or "gari" in text_lower:
+        # Check for direct service name inputs first (highest priority)
+        if re.search(r'\b(carwash|car wash|car washing|gari dhoni|car service)\b', text_lower) or (
+            re.search(r'\b(car|gari|vehicle|auto)\b', text_lower) and
+            re.search(r'\b(wash|clean|dhona)\b', text_lower)
+        ):
             service = "car wash"
-        elif "washing machine" in text_lower or "fridge" in text_lower or "cooler" in text_lower or "appliance" in text_lower:
-            service = "appliance repair"
-        elif "ac " in text_lower or "ac" in text_lower or "split" in text_lower:
+        elif re.search(r'\b(ac repair|ac service|air conditioner|split unit)\b', text_lower) or re.search(r'\b(ac|split)\b', text_lower):
             service = "AC repair"
-        elif "pani" in text_lower or "leak" in text_lower or "plumb" in text_lower:
+        elif re.search(r'(washing machine|fridge|oven|appliance)', text_lower):
+            service = "appliance repair"
+        elif re.search(r'(geyser|water heater)', text_lower):
+            service = "geyser repair"
+        elif re.search(r'\b(gardener|gardening|garden|plant|grass|lawn|tree)\b', text_lower):
+            service = "gardening"
+        elif re.search(r'\b(security|cctv|camera|guard|secur)\b', text_lower):
+            service = "security"
+        elif re.search(r'\b(painter|painting|paint|whitewash|safedi|color)\b', text_lower):
+            service = "painting"
+        elif re.search(r'\b(pest control|pest|bug|insect|termite|spray)\b', text_lower):
+            service = "pest control"
+        elif re.search(r'\b(home cleaning|cleaning|cleaner|maid|sweep|safai|dust)\b', text_lower):
+            service = "home cleaning"
+        elif re.search(r'\b(carpenter|carpentry|wood|furniture|door|lock|darwaza|table|chair)\b', text_lower):
+            service = "carpentry"
+        elif re.search(r'\b(plumber|plumbing|pipe|leak|motor|pani|water|sink)\b', text_lower):
             service = "plumbing"
-        else:
+        elif re.search(r'\b(electrician|electric|bijli|wiring|lights|fan|switch)\b', text_lower):
             service = "electrician"
+        else:
+            service = "electrician"  # true last resort
 
         urgency = "high" if "urgent" in text_lower or "jaldi" in text_lower else "medium"
         location = "G-13" if "g-13" in text_lower or "g13" in text_lower else "F-7" if "f7" in text_lower else "unknown"

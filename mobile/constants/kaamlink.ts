@@ -1,4 +1,4 @@
-export const API_BASE = 'https://kaamlink-ai-service-orchestrator-production.up.railway.app';
+export const API_BASE = 'http://192.168.18.143:8000';
 
 export const C = {
   // Backgrounds

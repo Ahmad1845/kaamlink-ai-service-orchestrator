@@ -46,11 +46,23 @@ export default function HomeScreen({ onNext, onTabChange, activeTab = 'HOME' }: 
       setStep(3); await new Promise(r => setTimeout(r, 700)); setStep(4);
       const providers = rawProviders.map((p: any, i: number) => {
         const d = Number(p.distance_km) || ((i + 1) * 0.9);
+        
+        // Generate dynamic AI insight based on the actual service requested
+        const srv = intentData.service.toLowerCase();
+        let dynamicReasoning = '';
+        if (i === 0) {
+          dynamicReasoning = `Highest ranked for ${srv} in your area. Excellent response time and reliability score.`;
+        } else if (i === 1) {
+          dynamicReasoning = `Highly rated for transparent pricing and quality ${srv} services nearby.`;
+        } else {
+          dynamicReasoning = `Experienced team for complex ${srv} jobs with a solid track record.`;
+        }
+
         return {
           ...p,
           distance: d.toFixed(1) + 'km',
           eta: Math.round(d * 8 + 5) + ' mins',
-          reasoning: REASONINGS[Math.min(i, REASONINGS.length - 1)],
+          reasoning: dynamicReasoning,
         };
       });
       onNext({ intent: intentData, providers });
