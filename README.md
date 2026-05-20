@@ -54,6 +54,12 @@ The system operates across a decoupled, highly cohesive three-tier architecture:
 7. **Booking & Scheduling Agents:** Create the transaction, resolving slot overlaps and queuing notifications.
 8. **Standby Recovery Agent:** Actively monitors the booking, executing seamless rerouting if simulated cancellations occur.
 
+### 🌐 Production Hosting & Distribution
+To ensure professional-grade production delivery:
+* **Backend Live on Railway:** The backend API is successfully deployed live on **Railway**, ensuring fast agent trace delivery, optimal response latencies, and 24/7 availability for external API evaluations.
+* **EAS Expo Standalone APK:** The mobile client application has been successfully packaged into a standalone Android APK using **Expo Application Services (EAS)**, guaranteeing a streamlined, hassle-free installation on any physical Android device for live testing.
+
+
 ---
 
 ## 🤖 The 11-Agent Registry
@@ -180,3 +186,30 @@ For seamless offline capabilities, rapid developer velocity, and production stab
 
 ### 3. Real-Time Cascading Bid Engine
 Overhauled with React Native's `LayoutAnimation` API, the **Bidding Engine** simulates a streaming market environment. The mobile UI dynamically accepts up to 5 provider bids, cascading cards into view with a smooth spring response and initiating interactive countdowns, making the platform feel responsive and alive.
+
+---
+
+## 🔮 Future Product Roadmap & Scope
+
+While Kaamlink currently offers a highly sophisticated consumer-facing orchestrator, the underlying architecture has been designed to support rapid scaling into a full-scale commercial gig-platform:
+
+### 1. Dual-Sided Platform (Dedicated Provider Application)
+* Develop a specialized professional-side interface for service providers.
+* Enable providers to accept real-time booking requests, manage their calendars, set baseline price points, and interact directly with the orchestrator’s Scheduling and Radius Expansion systems.
+
+### 2. Real-Time Map & Routing APIs (Google Maps/Mapbox)
+* Transition from coordinate-based distance estimation to production-grade spatial mapping engines.
+* Calculate highly accurate, traffic-aware ETAs, driving times, and precise route overlays for dispatch calculations.
+
+### 3. SSE/WebSocket Live Provider Tracing
+* Implement real-time coordinate updates using Server-Sent Events (SSE) or WebSockets.
+* Allow users to visually trace their booked provider’s live movement on an interactive map directly within the client app as they travel to the job site.
+
+### 4. Direct In-App VoIP & Encrypted Chat
+* Integrate secure VoIP calling (via WebRTC) and instantaneous real-time chat.
+* Enable consumers and service professionals to communicate instantly and securely during a booking cycle without sharing personal cellular phone numbers.
+
+### 5. Local Escrow Payment Gateway
+* Integrate Pakistan-centric digital payment APIs (JazzCash, Easypaisa, NayaPay).
+* Build an escrow framework that secures payment upon request confirmation and releases funds only when the **Quality Agent** validates the customer's job-completion checklist and star rating.
+
