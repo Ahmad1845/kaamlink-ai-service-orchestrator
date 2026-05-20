@@ -1,8 +1,32 @@
-# Kaamlink — AI-Driven Hyper-Local Service Orchestrator
+# 🚀 Kaamlink — AI-Driven Hyper-Local Service Orchestrator
 
-Kaamlink is a next-generation, agentic home service orchestrator designed specifically for localized, unstructured markets like Pakistan. Powered by a collaborative team of **11 specialized AI and deterministic agents**, Kaamlink translates colloquial user requests in Roman Urdu (e.g., *"AC kharab ho gaya hai, koi mechanic bhej dein urgently!"*) into highly optimized, resilient, and reliable service bookings.
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.111-005571?logo=fastapi)](https://fastapi.tiangolo.com/)
+[![React Native](https://img.shields.io/badge/React_Native-0.81-61DAFB?logo=react&logoColor=black)](https://reactnative.dev/)
+[![Expo](https://img.shields.io/badge/Expo-54-000020?logo=expo)](https://expo.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
+[![Google Gemini](https://img.shields.io/badge/Google_Gemini-2.5_Flash-8E75B2?logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
+[![Railway](https://img.shields.io/badge/Deployed_on-Railway-0B0D0E?logo=railway)](https://railway.app/)
 
-Built for the **Google Antigravity Hackathon**, Kaamlink models the "Always Watching" promise of advanced agentic systems. It actively manages the entire service lifecycle—from initial request understanding, dynamic pricing, progressive radius expansions, and automated cancellation recovery, to trust-loop rating updates and automated dispute resolution.
+> **A Google Antigravity Hackathon Submission**
+>
+> Kaamlink is a next-generation, agentic home service orchestrator designed specifically for localized, unstructured markets like Pakistan. Powered by a collaborative team of **11 specialized AI and deterministic agents**, Kaamlink translates colloquial user requests in Roman Urdu (e.g., *"AC kharab ho gaya hai, koi mechanic bhej dein urgently!"*) into highly optimized, resilient, and reliable service bookings.
+
+Kaamlink models the **"Always Watching"** promise of advanced agentic systems. It actively manages the entire service lifecycle — from initial request understanding, dynamic pricing, progressive radius expansions, and automated cancellation recovery, to trust-loop rating updates and automated dispute resolution.
+
+---
+
+## 📑 Table of Contents
+1. [The Solution & Core Value Proposition](#-the-solution--core-value-proposition)
+2. [Full Technology Stack](#-full-technology-stack)
+3. [Architecture Overview](#%EF%B8%8F-architecture-overview)
+4. [The 11-Agent Registry](#-the-11-agent-registry)
+5. [Mock vs. Real Integrations](#-mock-vs-real-integrations--apis)
+6. [Database Schema](#-database-schema)
+7. [Quick Start Guide](#-quick-start-guide)
+8. [Advanced Engineering Achievements](#%EF%B8%8F-advanced-engineering-achievements)
+9. [Future Product Roadmap & Scope](#-future-product-roadmap--scope)
 
 ---
 
@@ -14,7 +38,101 @@ In emerging, high-friction gig economies like Pakistan's, home service booking p
 * **Volatile Pricing:** Lack of standard rates leads to price gouging or extreme low-ball bidding that exploits workers.
 * **High Cancellation Rates:** Sudden provider dropouts and scheduling conflicts derail standard queue bookings.
 
-Kaamlink solves these issues by placing an intelligent **Multi-Agent Orchestrator** in charge of the booking lifecycle, establishing a marketplace governed by automated AI guardrails, dynamic market boundaries, and transparent reasoning logs.
+**Kaamlink solves these issues** by placing an intelligent **Multi-Agent Orchestrator** in charge of the booking lifecycle, establishing a marketplace governed by automated AI guardrails, dynamic market boundaries, and transparent reasoning logs.
+
+---
+
+## 🧰 Full Technology Stack
+
+### 🤖 AI & Intelligence
+| Technology | Version | Purpose |
+|---|---|---|
+| **Google Gemini 2.5 Flash** | API v1 | Intent extraction, complexity classification, location normalization, pricing guidance |
+| **`google-genai` SDK** | Latest | Python client for all Gemini API interactions |
+| **Structured JSON Prompting** | — | Enforces strict output schemas from LLM responses |
+| **Multi-Agent Orchestration** | Custom | 11-agent pipeline coordinated in `antigravity_orchestrator.py` |
+
+### 🐍 Backend (Python)
+| Technology | Version | Purpose |
+|---|---|---|
+| **FastAPI** | Latest | High-performance async REST API framework |
+| **Uvicorn** | Latest | ASGI server powering the FastAPI application |
+| **Pydantic** | v2 | Request/response data validation and schema modeling |
+| **python-dotenv** | Latest | Secure `.env`-based environment variable management |
+| **Supabase Python SDK** | Latest | PostgreSQL database client for all persistent storage |
+
+### 🗄️ Database & Storage
+| Technology | Version | Purpose |
+|---|---|---|
+| **Supabase** | Cloud | Hosted PostgreSQL database for all production data |
+| **PostgreSQL** | 15+ | Relational database: providers, bookings, logs, disputes |
+| **In-Memory Fallback Store** | Custom | Thread-safe Python dict fallback when Supabase is unavailable |
+
+### 📱 Mobile Frontend (React Native)
+| Technology | Version | Purpose |
+|---|---|---|
+| **React Native** | 0.81.5 | Core cross-platform mobile UI framework |
+| **React** | 19.1.0 | UI rendering and component state management |
+| **Expo** | ~54.0.33 | Development toolchain, build system, and native API access |
+| **Expo Router** | ~6.0.23 | File-system based navigation for React Native |
+| **TypeScript** | ~5.9.2 | Static typing for the entire mobile codebase |
+
+### 🎨 UI & Styling (Mobile)
+| Technology | Version | Purpose |
+|---|---|---|
+| **Expo Linear Gradient** | ~15.0.8 | Gradient backgrounds on screens and cards |
+| **Expo Blur** | ~15.0.8 | Glassmorphism blur effects on UI overlays |
+| **Expo Symbols** | ~1.0.8 | Native SF Symbol icons on iOS |
+| **@expo/vector-icons** | ^15.0.3 | Ionicons and icon library across all screens |
+| **React Native Reanimated** | ~4.1.1 | High-performance 60fps animations and transitions |
+| **React Native Gesture Handler** | ~2.28.0 | Swipe gestures and touch interaction handling |
+| **React Native Worklets** | 0.5.1 | JS worklet threads for animation performance |
+| **Expo Image** | ~3.0.11 | Optimized image loading and caching |
+| **Expo Haptics** | ~15.0.8 | Tactile haptic feedback on interactive elements |
+
+### 🔤 Typography (Mobile)
+| Technology | Version | Purpose |
+|---|---|---|
+| **Plus Jakarta Sans** | @expo-google-fonts ^0.4.2 | Primary display & body typeface throughout the app |
+| **JetBrains Mono** | @expo-google-fonts ^0.4.1 | Monospace font used in the agent trace console panels |
+| **Inter** | @expo-google-fonts ^0.4.2 | Secondary sans-serif for supporting UI elements |
+
+### 🧭 Navigation (Mobile)
+| Technology | Version | Purpose |
+|---|---|---|
+| **@react-navigation/native** | ^7.1.8 | Core navigation container and primitives |
+| **@react-navigation/bottom-tabs** | ^7.4.0 | Bottom tab navigator for HOME / SERVICES / REQUESTS / ACCOUNT |
+| **@react-navigation/elements** | ^2.6.3 | Shared navigation UI components |
+| **React Native Screens** | ~4.16.0 | Native screen container optimization |
+| **React Native Safe Area Context** | ~5.6.0 | Safe area insets for notched and island devices |
+
+### 🌐 Mobile System & Web
+| Technology | Version | Purpose |
+|---|---|---|
+| **Expo Constants** | ~18.0.13 | Access to device and app runtime constants |
+| **Expo Linking** | ~8.0.11 | Deep linking and external URL handling |
+| **Expo Splash Screen** | ~31.0.13 | Custom splash screen shown on cold boot |
+| **Expo Status Bar** | ~3.0.9 | Status bar color and style management |
+| **Expo System UI** | ~6.0.9 | System-level UI background color control |
+| **Expo Web Browser** | ~15.0.10 | In-app web browser for external links |
+| **React Native Web** | ~0.21.0 | Enables the Expo app to run in a browser (web target) |
+| **React DOM** | 19.1.0 | React DOM renderer for web target |
+
+### ☁️ Infrastructure & Deployment
+| Technology | Purpose |
+|---|---|
+| **Railway** | Live production hosting for the FastAPI backend (24/7 uptime) |
+| **Expo EAS (Expo Application Services)** | Standalone APK build pipeline for Android distribution |
+| **Expo Font** | ~14.0.11 — Async custom font loading at startup |
+
+### 🛠️ Developer Tooling
+| Technology | Version | Purpose |
+|---|---|---|
+| **ESLint** | ^9.25.0 | Linting and code quality enforcement for TypeScript |
+| **eslint-config-expo** | ~10.0.0 | Expo-specific ESLint ruleset |
+| **@types/react** | ~19.1.0 | TypeScript type definitions for React |
+| **Python venv** | Built-in | Isolated Python dependency environment for the backend |
+| **Google Antigravity AI** | — | Agentic IDE used for all development (vibe coding) |
 
 ---
 
@@ -22,7 +140,7 @@ Kaamlink solves these issues by placing an intelligent **Multi-Agent Orchestrato
 
 The system operates across a decoupled, highly cohesive three-tier architecture:
 
-```
+```text
                   ┌────────────────────────────────────────┐
                   │          React Native Frontend         │
                   │   (Expo Go, Cascading Bids Screen,     │
@@ -55,10 +173,8 @@ The system operates across a decoupled, highly cohesive three-tier architecture:
 8. **Standby Recovery Agent:** Actively monitors the booking, executing seamless rerouting if simulated cancellations occur.
 
 ### 🌐 Production Hosting & Distribution
-To ensure professional-grade production delivery:
 * **Backend Live on Railway:** The backend API is successfully deployed live on **Railway**, ensuring fast agent trace delivery, optimal response latencies, and 24/7 availability for external API evaluations.
 * **EAS Expo Standalone APK:** The mobile client application has been successfully packaged into a standalone Android APK using **Expo Application Services (EAS)**, guaranteeing a streamlined, hassle-free installation on any physical Android device for live testing.
-
 
 ---
 
@@ -195,7 +311,7 @@ While Kaamlink currently offers a highly sophisticated consumer-facing orchestra
 
 ### 1. Dual-Sided Platform (Dedicated Provider Application)
 * Develop a specialized professional-side interface for service providers.
-* Enable providers to accept real-time booking requests, manage their calendars, set baseline price points, and interact directly with the orchestrator’s Scheduling and Radius Expansion systems.
+* Enable providers to accept real-time booking requests, manage their calendars, set baseline price points, and interact directly with the orchestrator's Scheduling and Radius Expansion systems.
 
 ### 2. Real-Time Map & Routing APIs (Google Maps/Mapbox)
 * Transition from coordinate-based distance estimation to production-grade spatial mapping engines.
@@ -203,7 +319,7 @@ While Kaamlink currently offers a highly sophisticated consumer-facing orchestra
 
 ### 3. SSE/WebSocket Live Provider Tracing
 * Implement real-time coordinate updates using Server-Sent Events (SSE) or WebSockets.
-* Allow users to visually trace their booked provider’s live movement on an interactive map directly within the client app as they travel to the job site.
+* Allow users to visually trace their booked provider's live movement on an interactive map directly within the client app as they travel to the job site.
 
 ### 4. Direct In-App VoIP & Encrypted Chat
 * Integrate secure VoIP calling (via WebRTC) and instantaneous real-time chat.
@@ -213,3 +329,6 @@ While Kaamlink currently offers a highly sophisticated consumer-facing orchestra
 * Integrate Pakistan-centric digital payment APIs (JazzCash, Easypaisa, NayaPay).
 * Build an escrow framework that secures payment upon request confirmation and releases funds only when the **Quality Agent** validates the customer's job-completion checklist and star rating.
 
+---
+
+*Built with ❤️ for the Google Antigravity Hackathon.*
