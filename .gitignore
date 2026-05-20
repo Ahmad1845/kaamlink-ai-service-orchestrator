@@ -16,3 +16,9 @@ venv/
 .idea/
 .vscode/
 antigravity_submission.zip
+output_docs.txt
+expo_qr.png
+generate_qr.py
+render.yaml
+*.docx
+*.pdf
