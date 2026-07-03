@@ -290,6 +290,7 @@ npx expo start --lan --port 8082 --clear
 ```
 Open **Expo Go** on your iOS/Android device and scan the QR code displayed in the terminal to interact with the high-fidelity flow!
 
+# Direct  APK Link: https://drive.google.com/drive/folders/1VhmuK8vpt1bR_ymridTUWakVUXA4BhqU
 ---
 
 ## 🛠️ Advanced Engineering Achievements
